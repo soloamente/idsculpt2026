@@ -1,0 +1,27 @@
+{
+  "name": "@idsculpt/api",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@idsculpt/auth": "workspace:*",
+    "@idsculpt/db": "workspace:*",
+    "@idsculpt/env": "workspace:*",
+    "@trpc/client": "catalog:",
+    "@trpc/server": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@idsculpt/config": "workspace:*",
+    "elysia": "catalog:",
+    "typescript": "^5"
+  }
+}

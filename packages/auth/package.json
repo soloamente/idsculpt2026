@@ -1,0 +1,24 @@
+{
+  "name": "@idsculpt/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@idsculpt/db": "workspace:*",
+    "@idsculpt/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@idsculpt/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
