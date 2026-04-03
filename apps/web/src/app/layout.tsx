@@ -4,37 +4,44 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../index.css";
 import Header from "@/components/header";
 import Providers from "@/components/providers";
+import { SitePreloader } from "@/components/site-preloader";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+	variable: "--font-geist-sans",
+	subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+	variable: "--font-geist-mono",
+	subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "idsculpt",
-  description: "idsculpt",
+	title: "idsculpt",
+	description: "idsculpt",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            {children}
-          </div>
-        </Providers>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body
+				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+			>
+				<Providers>
+					{/* Intro overlay (slide-up) then main shell — see `SitePreloader`. */}
+					<SitePreloader>
+						{/* Use min-height so pages can grow taller than viewport and remain scrollable. */}
+						<div className="grid min-h-svh grid-rows-[auto_1fr]">
+							<Header />
+							{children}
+						</div>
+					</SitePreloader>
+				</Providers>
+			</body>
+		</html>
+	);
 }
