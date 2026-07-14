@@ -8,11 +8,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import {
-	HeaderContactDesktop,
-	HeaderContactMobile,
-} from "@/components/header-contact";
 import { useHeaderTextFromSections } from "@/hooks/use-header-text-from-sections";
+import { CONTACT_EMAIL } from "@/lib/contact";
+
+/** Chiave per l’effetto neon al click: non è una rotta, solo id interno. */
+const HEADER_EMAIL_NEON_ID = "header:email-us";
 
 /** Past this scroll offset (px) we allow hide-on-scroll-down behavior. */
 const SCROLL_AWAY_THRESHOLD_PX = 64;
@@ -22,8 +22,13 @@ export default function Header() {
 	const headerTextMode = useHeaderTextFromSections();
 	/** When true, header fades out (scroll down past threshold); scroll up reveals it again. */
 	const [isHeaderHidden, setIsHeaderHidden] = useState(false);
-	/** Mobile full-screen top sheet: open/closed (nav + contact live here on small screens). */
+	/** Mobile full-screen top sheet: open/closed (nav + “Email us” in fondo al foglio). */
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+	/** Token incrementato a ogni click su una voce nav: animazione CSS “neon on” (desktop + mobile). */
+	const [navNeonFlash, setNavNeonFlash] = useState<{
+		href: string;
+		token: number;
+	} | null>(null);
 	const lastScrollYRef = useRef(0);
 	const prefersReducedMotion = useReducedMotion();
 
@@ -83,8 +88,33 @@ export default function Header() {
 		};
 	}, [isMobileMenuOpen]);
 
+	// Fine animazione click nav: togli la classe (durata = keyframes `header-nav-neon-blink` in index.css).
+	useEffect(() => {
+		if (!navNeonFlash || prefersReducedMotion) return;
+		const ms = 680;
+		const id = window.setTimeout(() => setNavNeonFlash(null), ms);
+		return () => window.clearTimeout(id);
+	}, [navNeonFlash, prefersReducedMotion]);
+
+	const handleNavLinkClick = (href: string) => {
+		if (prefersReducedMotion) return;
+		setNavNeonFlash({ href, token: Date.now() });
+	};
+
+	/** True mentre gira l’effetto neon sul CTA “Email us” (stesso `href` sintetico). */
+	const isHeaderEmailNeonPlaying = navNeonFlash?.href === HEADER_EMAIL_NEON_ID;
+
 	const navClassnames =
 		"transition-all duration-200 hover:scale-98 hover:opacity-50 will-change-auto";
+
+	/** Stessa pill vetrosa del nav: logo, voci e CTA condividono bordo/sfondo/blur. */
+	const headerPillSurfaceClassnames = cn(
+		"rounded-full px-5 py-2.5 text-sm transition-colors duration-200 ease-out",
+		headerTextMode === "light"
+			? "border border-black/10 bg-black/40 backdrop-blur-sm"
+			: "border border-black/10 bg-white/50 backdrop-blur-sm",
+	);
+
 	return (
 		<header
 			className={cn(
@@ -103,26 +133,94 @@ export default function Header() {
 						headerTextMode === "light" ? "text-white" : "text-black",
 					)}
 				>
-					<h1 className="font-bold">iDentity Sculpt</h1>
+					{/* Logo pill: testo i/s più grande; stesso padding delle altre pill per altezza identica. */}
+					<div
+						className={cn(
+							"inline-flex items-center",
+							headerPillSurfaceClassnames,
+						)}
+					>
+						<h1 className="font-medium text-base leading-none md:text-lg lg:text-xl">
+							i/s
+						</h1>
+					</div>
 
-					{/* Desktop: same row as before — nav and contact are separate flex items with justify-between on the row. */}
-					<nav className="hidden items-center gap-4 md:flex">
-						{navigation.map((item) => (
-							<Link
-								key={item.href}
-								className={cn(
-									navClassnames,
-									pathname === item.href
-										? "font-bold"
-										: "font-medium will-change-auto",
-								)}
-								href={item.href as Route<string>}
-							>
-								{item.label}
-							</Link>
-						))}
+					{/* Desktop: nav in pill — stesso criterio del testo: bianco su sfondo sezione scura → pill scura; nero su chiara → pill chiara. */}
+					<nav
+						className={cn(
+							"hidden items-center gap-7 md:flex",
+							headerPillSurfaceClassnames,
+						)}
+					>
+						{navigation.map((item) => {
+							// True when this route is current — show the left square marker on desktop.
+							const isActive = pathname === item.href;
+							const isNeonPlaying = navNeonFlash?.href === item.href;
+							return (
+								<Link
+									key={item.href}
+									aria-current={isActive ? "page" : undefined}
+									className={cn(
+										"inline-flex items-center",
+										navClassnames,
+										// Evita che `transition-all` lisci l’opacità del genitore mentre sfrigola il figlio.
+										isNeonPlaying && "transition-none",
+										isActive
+											? "font-medium"
+											: // Durante il neon, togli l’attenuazione sennò il flicker resta a metà.
+												isNeonPlaying
+												? "opacity-100 will-change-transform"
+												: "opacity-50 will-change-transform",
+									)}
+									href={item.href as Route<string>}
+									onClick={() => handleNavLinkClick(item.href)}
+								>
+									<span
+										key={isNeonPlaying ? String(navNeonFlash?.token) : "idle"}
+										className={cn(
+											"inline-flex items-center gap-1",
+											isNeonPlaying && "header-nav-neon-blink",
+										)}
+									>
+										{isActive ? (
+											<span
+												aria-hidden
+												className="size-[0.4em] shrink-0 bg-current"
+											/>
+										) : null}
+										{item.label}
+									</span>
+								</Link>
+							);
+						})}
 					</nav>
-					<HeaderContactDesktop headerTextMode={headerTextMode} />
+					{/* Sostituisce il vecchio pannello Contact: solo mailto, look come nav attiva (sempre quadrato + label). */}
+					<a
+						className={cn(
+							"hidden items-center md:inline-flex",
+							headerPillSurfaceClassnames,
+							navClassnames,
+							"font-medium",
+						)}
+						href={`mailto:${CONTACT_EMAIL}`}
+						onClick={() => handleNavLinkClick(HEADER_EMAIL_NEON_ID)}
+					>
+						<span
+							key={
+								isHeaderEmailNeonPlaying
+									? String(navNeonFlash?.token)
+									: "email-idle"
+							}
+							className={cn(
+								"inline-flex items-center gap-1",
+								isHeaderEmailNeonPlaying && "header-nav-neon-blink",
+							)}
+						>
+							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+							{/* L’`uppercase` del contenitore padre rende “EMAIL US” come nel mock. */}
+							Email us
+						</span>
+					</a>
 
 					{/* Mobile: icon-only control on the right; nav opens as a top sheet with centered links. */}
 					<div className="flex md:hidden">
@@ -200,26 +298,72 @@ export default function Header() {
 								</button>
 							</div>
 							<nav className="flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
-								{navigation.map((item) => (
-									<Link
-										key={item.href}
+								{navigation.map((item) => {
+									const isNeonPlaying = navNeonFlash?.href === item.href;
+									return (
+										<Link
+											key={item.href}
+											className={cn(
+												"w-full max-w-sm rounded-md py-3 text-center font-medium text-black uppercase tracking-wide",
+												!isNeonPlaying && "transition-colors",
+												// Large, fluid type so titles read as the hero of the overlay.
+												"text-[clamp(1.75rem,7vw,2.75rem)] leading-tight",
+												pathname === item.href
+													? "font-semibold opacity-100"
+													: isNeonPlaying
+														? "opacity-100"
+														: "opacity-90 hover:opacity-100",
+											)}
+											href={item.href as Route<string>}
+											onClick={() => {
+												handleNavLinkClick(item.href);
+												setIsMobileMenuOpen(false);
+											}}
+										>
+											<span
+												key={
+													isNeonPlaying ? String(navNeonFlash?.token) : "idle"
+												}
+												className={cn(
+													"inline-block w-full",
+													isNeonPlaying && "header-nav-neon-blink",
+												)}
+											>
+												{item.label}
+											</span>
+										</Link>
+									);
+								})}
+								{/* Stessa identità visiva del desktop: quadrato + “EMAIL US”, link mailto. */}
+								<a
+									className={cn(
+										"w-full max-w-sm rounded-md py-3 text-center font-semibold text-black uppercase tracking-wide transition-opacity",
+										"text-[clamp(1.75rem,7vw,2.75rem)] leading-tight",
+									)}
+									href={`mailto:${CONTACT_EMAIL}`}
+									onClick={() => {
+										handleNavLinkClick(HEADER_EMAIL_NEON_ID);
+										setIsMobileMenuOpen(false);
+									}}
+								>
+									<span
+										key={
+											isHeaderEmailNeonPlaying
+												? String(navNeonFlash?.token)
+												: "m-email-idle"
+										}
 										className={cn(
-											"w-full max-w-sm rounded-md py-3 text-center font-medium text-black uppercase tracking-wide transition-colors",
-											// Large, fluid type so titles read as the hero of the overlay.
-											"text-[clamp(1.75rem,7vw,2.75rem)] leading-tight",
-											pathname === item.href
-												? "font-semibold opacity-100"
-												: "opacity-90 hover:opacity-100",
+											"inline-flex w-full items-center justify-center gap-1.5",
+											isHeaderEmailNeonPlaying && "header-nav-neon-blink",
 										)}
-										href={item.href as Route<string>}
-										onClick={() => setIsMobileMenuOpen(false)}
 									>
-										{item.label}
-									</Link>
-								))}
-								<HeaderContactMobile
-									onNavigate={() => setIsMobileMenuOpen(false)}
-								/>
+										<span
+											aria-hidden
+											className="size-[0.4em] shrink-0 self-center bg-current"
+										/>
+										Email us
+									</span>
+								</a>
 							</nav>
 						</motion.div>
 					</>

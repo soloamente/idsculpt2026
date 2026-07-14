@@ -8,6 +8,7 @@
 		"start": "next start"
 	},
 	"dependencies": {
+		"@basementstudio/shader-lab": "^1.4.0",
 		"@idsculpt/api": "workspace:*",
 		"@idsculpt/auth": "workspace:*",
 		"@idsculpt/env": "workspace:*",
@@ -21,6 +22,7 @@
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
 		"framer-motion": "^12.38.0",
+		"glimm": "^0.1.3",
 		"lenis": "^1.3.21",
 		"lucide-react": "catalog:",
 		"motion": "^12.38.0",
@@ -28,6 +30,7 @@
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"sonner": "catalog:",
+		"three": "^0.185.1",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

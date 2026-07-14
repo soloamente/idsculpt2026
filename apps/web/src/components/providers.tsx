@@ -21,9 +21,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 			animationFrameId = window.requestAnimationFrame(onFrame);
 		};
 
+		// Lenis may not emit native scroll events — dispatch so scroll-linked UI (footer glow) updates.
+		const onLenisScroll = () => {
+			window.dispatchEvent(new Event("app-scroll"));
+		};
+		lenis.on("scroll", onLenisScroll);
+
 		animationFrameId = window.requestAnimationFrame(onFrame);
 
 		return () => {
+			lenis.off("scroll", onLenisScroll);
 			window.cancelAnimationFrame(animationFrameId);
 			lenis.destroy();
 		};

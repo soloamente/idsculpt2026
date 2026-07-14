@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "better-colors": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-colors/SKILL.md",
+      "computedHash": "a1a31d95c950b41a21549eec8534a121a0b73a1dd386048efeab0ac912f56b4d"
+    },
+    "better-typography": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-typography/SKILL.md",
+      "computedHash": "f70768fd8bdb54eb6f788daee78ef54169a21ea92a1f286fa988b84b1c08872f"
+    },
+    "better-ui": {
+      "source": "jakubkrehel/skills",
+      "sourceType": "github",
+      "skillPath": "skills/better-ui/SKILL.md",
+      "computedHash": "6c9fa842287018baf84cded48396ecec5c12e5ba151d47ac2a37fc008a5948db"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@idsculpt/ui/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { type ReactNode, useEffect, useState } from "react";
 
@@ -60,6 +61,15 @@ export function SitePreloader({ children }: SitePreloaderProps) {
 					: "relative min-h-svh w-full overflow-x-hidden bg-background"
 			}
 		>
+			{/* Grana che copre tutto il guscio (sibling di `motion`, non dentro) e scrolla con la pagina: `absolute` al wrapper `relative` invece di `fixed` al viewport. */}
+			{!showPreloader && (
+				<div
+					aria-hidden
+					className={cn(
+						"pointer-events-none absolute inset-0 z-30 min-h-0 w-full bg-[url('/images/overlay/bg-noize.png')] bg-auto bg-repeat opacity-70 mix-blend-overlay",
+					)}
+				/>
+			)}
 			<AnimatePresence
 				initial={false}
 				mode="popLayout"
@@ -106,7 +116,7 @@ function PreloaderPanel() {
 					// `h-auto` evita che il box flex del componente si allarghi in altezza e “sposti” il centro visivo.
 					className="h-auto w-auto max-w-full font-medium text-4xl uppercase tracking-tight [--gradient-wave-base:rgb(29,29,31)] sm:text-5xl dark:[--gradient-wave-base:rgb(29,29,31)]"
 				>
-					Benvenuto
+					WELCOME
 				</GradientWaveText>
 			</div>
 		</div>

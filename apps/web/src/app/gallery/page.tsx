@@ -1,132 +1,120 @@
 import Image from "next/image";
 import Link from "next/link";
+
+import { FadeFooter, FadeSection } from "@/components/fade-section";
+import { FooterDiaGradient } from "@/components/footer-dia-gradient";
+import { GalleryPageContent } from "@/components/gallery-page-content";
+import type { GalleryProject } from "@/components/gallery-project-card";
 import {
-	FadeFooter,
-	FadeInSection,
-	FadeSection,
-} from "@/components/fade-section";
-import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY } from "@/lib/contact";
+	CONTACT_EMAIL,
+	CONTACT_PHONE_DISPLAY,
+	CONTACT_PHONE_TEL,
+} from "@/lib/contact";
+
+/** Portfolio projects — set `isCaseStudy: true` when a deep-dive is ready to publish. */
+const galleryProjects: GalleryProject[] = [
+	{
+		images: [
+			"/images/tenryuu.png",
+			"/images/Frame 122.png",
+			"/images/tenryuu-posters.png",
+		],
+		alt: "Tenryuu",
+		title: "Tenryuu",
+		type: "Identity design",
+	},
+	{
+		images: ["/images/chili.png", "/images/chili_2.png"],
+		alt: "Chili Riders",
+		title: "Chili riders",
+		type: "Identity design",
+	},
+	{
+		images: ["/images/oasis-web.png"],
+		alt: "Oasis Team",
+		title: "Oasis-team",
+		type: "Brand refresh",
+	},
+	{
+		images: ["/images/meyou.png"],
+		alt: "Wave Catchers",
+		title: "Wave catchers",
+		type: "Logo redesign",
+	},
+	{
+		images: ["/images/mentally.png"],
+		alt: "Mentally",
+		title: "Mentally",
+		type: "Interface design",
+	},
+	{
+		images: ["/images/navia.png"],
+		alt: "Navia",
+		title: "Navia",
+		type: "Interface design",
+	},
+	{
+		images: ["/images/lonewolf.png"],
+		alt: "Lonewolf",
+		title: "lonewolf",
+		type: "Logo design",
+	},
+	{
+		images: ["/images/sydus.png"],
+		alt: "Sydus",
+		title: "sydus",
+		type: "Logo design",
+	},
+	{
+		images: ["/images/stars.png"],
+		alt: "Stars",
+		title: "stars",
+		type: "Logo design",
+	},
+];
 
 export default function Gallery() {
-	const works = [
-		{
-			image: "/images/tenryuu.png",
-			alt: "Tenryuu",
-			title: "Tenryuu",
-			type: "Brand Design",
-			description: "A unique visual identity for a Japanese restaurant",
-		},
-		{
-			image: "/images/chili.png",
-			alt: "Chili Riders",
-			title: "Chili Riders",
-			type: "Brand Identity",
-			description: "A unique visual identity for a motorcycle club",
-		},
-		{
-			image: "/images/mentally.png",
-			alt: "Mentally",
-			title: "Mentally",
-			type: "App Design",
-			description: "A unique mental health app design",
-		},
-		{
-			image: "/images/navia.png",
-			alt: "Navi",
-			title: "Navi",
-			type: "App Design",
-			description: "A unique visual identity for a navigation app",
-		},
-		{
-			image: "/images/oasis-web.png",
-			alt: "Oasis",
-			title: "Oasis",
-			type: "Website Design",
-			description: "A unique visual identity for a travel app",
-		},
-		{
-			image: "/images/tenryuu-posters.png",
-			alt: "Tenryuu",
-			title: "Tenryuu",
-			type: "Brand Design",
-			description: "A unique visual identity for a Japanese restaurant",
-		},
-	];
-
 	const socialClassnames =
 		"hover:scale-98 hover:opacity-50 transition-all duration-200 ease-in-out will-change-transform";
+	const contactPillClassnames =
+		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
+
 	return (
 		<main className="relative min-h-screen overflow-hidden">
+			<GalleryPageContent projects={galleryProjects} />
+
+			<FooterDiaGradient />
+
 			<FadeSection
-				className="relative flex w-full flex-col items-center justify-center text-pretty px-4 pt-100 pb-30 uppercase"
+				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 px-4 pt-40 pb-8 text-black"
 				data-header-text="dark"
-				id="gallery-intro"
-			>
-				<p className="text-sm opacity-50">Gallery</p>
-				<h1 className="max-w-3xl text-center font-medium text-2xl leading-tight">
-					Our offerings, <br /> a canvas of creativity.
-				</h1>
-			</FadeSection>
-			{/* Griglia statica: ogni card ha il proprio FadeInSection (observer + fade) */}
-			<section
-				className="relative flex min-h-screen w-full flex-col items-center justify-center gap-28 text-balance px-4 pt-40 pb-8 uppercase"
-				data-header-text="dark"
-				id="gallery-grid"
-			>
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-					{works.map((work, index) => (
-						<FadeInSection
-							key={`${work.image}-${index}`}
-							className="relative aspect-square bg-[#F8F7F7]"
-						>
-							<Image
-								src={work.image}
-								alt={work.alt}
-								loading="eager"
-								width={5000}
-								height={5000}
-							/>
-							<div className="absolute right-0 bottom-0 left-0 p-4 text-center uppercase">
-								<h3 className="font-medium opacity-50">{work.title}</h3>
-								<p className="text-xs opacity-25">{work.type}</p>
-							</div>
-						</FadeInSection>
-					))}
-				</div>
-			</section>
-			<div className="pointer-events-none absolute right-0 bottom-0 left-0 h-screen bg-gradient-to-t from-[#3798FF] via-[#85C0FF] to-[#FFFFFF]" />
-			<FadeSection
-				className="relative flex min-h-screen w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-8 text-white uppercase"
-				data-header-text="light"
 				id="contact"
 			>
-				<h2 className="max-w-xs text-center font-medium text-2xl leading-tight">
+				<h2 className="max-w-xs text-center font-medium text-2xl uppercase leading-tight">
 					Start your project with us
 				</h2>
-				<div className="flex flex-col gap-0">
-					{/* Apply the same vertical text gradient to both contact actions for visual consistency. */}
-					<button
-						type="button"
-						className="bg-linear-to-b from-[#202020] to-80% to-[#868686] bg-clip-text font-medium text-transparent text-xl uppercase transition-all duration-200 ease-in-out hover:scale-98"
-					>
-						{CONTACT_EMAIL}
-					</button>
-					<button
-						type="button"
-						className="bg-linear-to-b from-[#202020] to-80% to-[#868686] bg-clip-text font-medium text-transparent text-xl uppercase transition-all duration-200 ease-in-out hover:scale-98"
-					>
-						{CONTACT_PHONE_DISPLAY}
-					</button>
+				<div className="flex flex-col items-center gap-3">
+					<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
+						<span className="inline-flex items-center gap-1">
+							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+							{CONTACT_EMAIL}
+						</span>
+					</a>
+					<a className={contactPillClassnames} href={`tel:${CONTACT_PHONE_TEL}`}>
+						<span className="inline-flex items-center gap-1">
+							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+							{CONTACT_PHONE_DISPLAY}
+						</span>
+					</a>
 				</div>
 			</FadeSection>
 
 			<FadeFooter
-				className="relative flex w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-8 text-white uppercase"
+				className="relative z-10 flex w-full flex-col items-center justify-center gap-4 px-4 pt-40 pb-8 text-white uppercase"
 				data-header-text="light"
 				id="site-footer"
 			>
 				<div className="flex w-full items-center justify-between gap-0 text-sm md:text-base lg:text-lg">
-					{/* Mobile: © + year only; md+: full legal line. */}
 					<p className="opacity-50">
 						<span className="md:hidden">© {new Date().getFullYear()}</span>
 						<span className="hidden md:inline">
@@ -155,7 +143,7 @@ export default function Gallery() {
 						</Link>
 					</div>
 				</div>
-				<div className="w-full w-full">
+				<div className="w-full">
 					<Image
 						src="/images/logo.svg"
 						alt="Identity Sculpt"

@@ -27,3 +27,78 @@ button {
 		opacity: 1;
 	}
 }
+
+/* Click nav: effetto accensione al neon con sfrigolio (lampi rapidi on/off) poi stabile. */
+@keyframes header-nav-neon-blink {
+	0% {
+		opacity: 0.2;
+		filter: brightness(0.35) saturate(0.85);
+		text-shadow: 0 0 0 transparent;
+	}
+	/* Primi lampi “ballast” che non regge ancora */
+	5% {
+		opacity: 0.95;
+		filter: brightness(2) saturate(1.15);
+		text-shadow:
+			0 0 6px currentColor,
+			0 0 16px currentColor,
+			0 0 28px currentColor;
+	}
+	9% {
+		opacity: 0.2;
+		filter: brightness(0.4) saturate(0.9);
+		text-shadow: none;
+	}
+	14% {
+		opacity: 1;
+		filter: brightness(1.7);
+		text-shadow: 0 0 4px currentColor, 0 0 12px currentColor;
+	}
+	18% {
+		opacity: 0.25;
+		filter: brightness(0.45);
+		text-shadow: none;
+	}
+	23% {
+		opacity: 0.9;
+		filter: brightness(1.85);
+		text-shadow: 0 0 5px currentColor, 0 0 18px currentColor;
+	}
+	28% {
+		opacity: 0.45;
+		filter: brightness(0.55);
+		text-shadow: 0 0 2px currentColor;
+	}
+	34% {
+		opacity: 1;
+		filter: brightness(1.55);
+		text-shadow: 0 0 4px currentColor, 0 0 14px currentColor;
+	}
+	/* Meno sfrigolio, comincia a tenere */
+	45% {
+		opacity: 0.88;
+		filter: brightness(1.1);
+		text-shadow: 0 0 3px currentColor;
+	}
+	58% {
+		opacity: 1;
+		filter: brightness(1.25);
+		text-shadow: 0 0 2px currentColor, 0 0 8px currentColor;
+	}
+	100% {
+		opacity: 1;
+		filter: brightness(1) saturate(1);
+		text-shadow: 0 0 0 transparent;
+	}
+}
+
+.header-nav-neon-blink {
+	/* `linear` mantiene i “salti” tra i keyframe — più da neon stridente che ease morbida */
+	animation: header-nav-neon-blink 0.62s linear both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.header-nav-neon-blink {
+		animation: none;
+	}
+}
