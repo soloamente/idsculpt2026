@@ -8,7 +8,7 @@ const socialClassnames =
 
 /** Shared shell — safe-area padding keeps copy/logo above the mobile browser chrome. */
 export const siteFooterShellClassnames =
-	"relative z-10 flex w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-[max(2rem,env(safe-area-inset-bottom,0px))] text-white uppercase";
+	"relative z-10 flex w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+1rem))] text-white uppercase";
 
 /** Shared site footer — homepage markup (copyright, socials, full-width logo). */
 export function SiteFooter() {

@@ -22,9 +22,10 @@ export const metadata: Metadata = {
 	description: "idsculpt",
 };
 
-/** Lets `env(safe-area-inset-*)` reach the real screen edges on iOS. */
+/** Lets footer padding use `env(safe-area-inset-*)` on notched devices. */
 export const viewport: Viewport = {
-	viewportFit: "cover",
+	width: "device-width",
+	initialScale: 1,
 };
 
 export default function RootLayout({
@@ -43,12 +44,11 @@ export default function RootLayout({
 						{/* Use min-height so pages can grow taller than viewport and remain scrollable. */}
 						<div className="grid min-h-svh grid-rows-[auto_1fr]">
 							<Header />
-							{/* min-h-min: grid row grows with page content instead of clipping overflow. */}
-							<div className="relative min-h-min w-full">{children}</div>
+							{children}
 						</div>
-						{/* Outside page `<main>` so overflow-hidden never clips the fixed glow. */}
-						<FooterDiaGradient />
 					</SitePreloader>
+					{/* Sibling of preloader shell — true viewport-fixed, no transform/overflow ancestors. */}
+					<FooterDiaGradient />
 				</Providers>
 			</body>
 		</html>
