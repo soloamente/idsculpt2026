@@ -32,6 +32,14 @@ const TILT = {
 	spring: { stiffness: 220, damping: 24, mass: 0.6 }, // snappy, no wobble
 };
 
+/** Figma desktop 420×680; scales down on narrow viewports, full size from md up. */
+const TEAM_CARD_CLASS =
+	"relative isolate flex aspect-[420/680] w-[min(calc(100vw-3rem),300px)] max-w-[420px] shrink-0 flex-col gap-5 overflow-hidden rounded-3xl px-2.5 py-2.5 shadow-[inset_0_0_0_3px_rgba(255,255,255,0.13)] sm:w-[min(calc(100vw-4rem),340px)] md:w-[420px] md:gap-8";
+
+/** Centers snap scroll — half card width tracks the fluid mobile size. */
+const TEAM_SCROLL_PADDING =
+	"px-[max(1rem,calc(50%-min(210px,calc((100vw-3rem)/2))))] sm:px-[max(1rem,calc(50%-min(210px,calc((100vw-4rem)/2))))] md:px-[max(1rem,calc(50%-210px))]";
+
 /** Team member card data — matches Figma about carousel. */
 export interface AboutTeamMember {
 	image: string;
@@ -175,7 +183,7 @@ function TeamCard({
 
 	return (
 		// Extra padding on the slot so scale + tilt are not clipped by the scroll row.
-		<div className="flex shrink-0 snap-center items-center justify-center px-3 py-10">
+		<div className="flex shrink-0 snap-center items-center justify-center px-2 py-6 md:px-3 md:py-10">
 			{/* Perspective lives on a static wrapper so the tilt reads as 3D depth. */}
 			<div style={{ perspective: 1000 }}>
 				<motion.article
@@ -196,14 +204,10 @@ function TeamCard({
 									backfaceVisibility: "hidden",
 								}
 					}
-					className={cn(
-						// Inset ring avoids colored fringe on tilt (transparent border shows the page behind).
-						"relative isolate flex h-[680px] w-[420px] shrink-0 flex-col gap-8 overflow-hidden rounded-3xl px-2.5 py-2.5 shadow-[inset_0_0_0_3px_rgba(255,255,255,0.13)]",
-						member.cardClassName,
-					)}
+					className={cn(TEAM_CARD_CLASS, member.cardClassName)}
 				>
 					{/* Portrait — crossfade normal vs blend layers while scrolling between cards. */}
-					<div className="relative aspect-square w-full overflow-hidden rounded-[14px]">
+					<div className="relative aspect-square w-full overflow-hidden rounded-xl md:rounded-[14px]">
 						{blendClassName ? (
 							<motion.div
 								aria-hidden
@@ -216,7 +220,7 @@ function TeamCard({
 									alt=""
 									fill
 									className={portraitClassName}
-									sizes="420px"
+									sizes="(max-width: 768px) 85vw, 420px"
 									unoptimized
 								/>
 							</motion.div>
@@ -231,16 +235,16 @@ function TeamCard({
 								alt={member.name}
 								fill
 								className={portraitClassName}
-								sizes="420px"
+								sizes="(max-width: 768px) 85vw, 420px"
 								unoptimized
 							/>
 						</motion.div>
 					</div>
 
-					<div className="flex flex-col items-center gap-8">
-						<div className="flex items-center gap-6">
+					<div className="flex flex-col items-center gap-4 md:gap-8">
+						<div className="flex items-center gap-4 md:gap-6">
 							<SquareMarker />
-							<div className="text-center font-semibold text-[26px] text-white uppercase leading-tight">
+							<div className="text-center font-semibold text-[20px] text-white uppercase leading-tight md:text-[26px]">
 								{nameLines.map((line) => (
 									<p key={line}>{line}</p>
 								))}
@@ -248,7 +252,7 @@ function TeamCard({
 							<SquareMarker />
 						</div>
 
-						<div className="flex w-full flex-col gap-1 text-center font-normal text-[26px] text-white/40 capitalize">
+						<div className="flex w-full flex-col gap-1 text-center font-normal text-[18px] text-white/40 capitalize md:text-[26px]">
 							{member.roles.map((role) => (
 								<p key={role} className="min-h-[1em]">
 									{role}
@@ -258,7 +262,7 @@ function TeamCard({
 					</div>
 
 					{/* Fixed from the card bottom so quotes align across 1- and 2-line names. */}
-					<p className="absolute inset-x-2.5 bottom-10 text-center font-semibold text-[20px] text-white capitalize">
+					<p className="absolute inset-x-2.5 bottom-6 text-center font-semibold text-[16px] text-white capitalize md:bottom-10 md:text-[20px]">
 						{member.quote}
 					</p>
 
@@ -341,14 +345,17 @@ export function AboutTeamCarousel() {
 
 	return (
 		<section
-			className="relative z-1 mt-[165px] w-full py-32"
+			className="relative z-1 mt-20 w-full py-16 md:mt-[165px] md:py-32"
 			data-header-text="dark"
 			id="about-team"
 		>
 			<div className="flex flex-col items-center gap-9">
 				<div
 					ref={scrollRef}
-					className="flex w-full snap-x snap-mandatory gap-7 overflow-x-auto overflow-y-visible px-[max(1rem,calc(50%-210px))] py-6 [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+					className={cn(
+						"flex w-full snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-visible py-4 [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [scrollbar-width:none] md:gap-7 md:py-6 [&::-webkit-scrollbar]:hidden",
+						TEAM_SCROLL_PADDING,
+					)}
 				>
 					{TEAM_MEMBERS.map((member, index) => (
 						<TeamCard

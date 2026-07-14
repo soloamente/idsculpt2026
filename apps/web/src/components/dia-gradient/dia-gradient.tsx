@@ -70,78 +70,85 @@ export function DiaGradient({
 	const blurId = `dia-blur-${uid}`;
 	// Measure against a static box — transformed bounds skew scroll progress.
 	const measureRef = useRef<HTMLDivElement>(null);
+	// Scroll-linked scale commits straight to the DOM — avoids React batching skips on fast mobile flings.
+	const scaleLayerRef = useRef<HTMLDivElement>(null);
 
-	const [scaleY, setScaleY] = useState(reveal === "none" ? 1 : 0);
+	const [mountScaleY, setMountScaleY] = useState(reveal === "none" ? 1 : 0);
+
+	const computeScrollScaleY = () => {
+		if (scrollBasis === "page") {
+			const maxScroll = Math.max(
+				0,
+				document.documentElement.scrollHeight - window.innerHeight,
+			);
+			const scrollTop = window.scrollY;
+			const start = maxScroll * 0.35;
+			const span = Math.max(1, maxScroll - start);
+			return maxScroll <= 0
+				? 1
+				: Math.max(0, Math.min(1, (scrollTop - start) / span));
+		}
+
+		if (scrollBasis === "anchor") {
+			const anchor = document.querySelector(scrollAnchor);
+			if (!anchor) return 0;
+			const r = anchor.getBoundingClientRect();
+			const vh = window.innerHeight || 1;
+			return Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.65)));
+		}
+
+		const el = measureRef.current;
+		if (!el) return 0;
+		const r = el.getBoundingClientRect();
+		const vh = window.innerHeight || 1;
+		return Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.65)));
+	};
+
+	const paintScrollScaleY = () => {
+		const layer = scaleLayerRef.current;
+		if (!layer) return;
+		const next = computeScrollScaleY();
+		layer.style.transform = `scaleY(${next})`;
+	};
 
 	useEffect(() => {
 		const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 		if (reveal === "none" || reduced) {
-			setScaleY(1);
+			if (reveal === "scroll") {
+				paintScrollScaleY();
+				scaleLayerRef.current?.style.setProperty("transform", "scaleY(1)");
+			} else {
+				setMountScaleY(1);
+			}
 			return;
 		}
 
 		if (reveal === "mount") {
-			setScaleY(0);
+			setMountScaleY(0);
 			const id = requestAnimationFrame(() =>
-				requestAnimationFrame(() => setScaleY(1)),
+				requestAnimationFrame(() => setMountScaleY(1)),
 			);
 			return () => cancelAnimationFrame(id);
 		}
 
-		// Scroll-linked reveal: grows as the footer band enters the viewport.
-		let ticking = false;
-		const measure = () => {
-			ticking = false;
-
-			if (scrollBasis === "page") {
-				const maxScroll = Math.max(
-					0,
-					document.documentElement.scrollHeight - window.innerHeight,
-				);
-				const scrollTop = window.scrollY;
-				const start = maxScroll * 0.35;
-				const span = Math.max(1, maxScroll - start);
-				setScaleY(
-					maxScroll <= 0
-						? 1
-						: Math.max(0, Math.min(1, (scrollTop - start) / span)),
-				);
-				return;
-			}
-
-			if (scrollBasis === "anchor") {
-				const anchor = document.querySelector(scrollAnchor);
-				if (!anchor) return;
-				const r = anchor.getBoundingClientRect();
-				const vh = window.innerHeight || 1;
-				// 0 until the anchor's top nears the viewport; 1 once it has scrolled in.
-				setScaleY(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.65))));
-				return;
-			}
-
-			const el = measureRef.current;
-			if (!el) return;
-			const r = el.getBoundingClientRect();
-			const vh = window.innerHeight || 1;
-			setScaleY(Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.65))));
+		// Continuous rAF — mobile momentum scroll can skip sparse scroll/app-scroll events.
+		let raf = 0;
+		const tick = () => {
+			paintScrollScaleY();
+			raf = requestAnimationFrame(tick);
 		};
-		const onScroll = () => {
-			if (!ticking) {
-				ticking = true;
-				requestAnimationFrame(measure);
-			}
-		};
+		paintScrollScaleY();
+		raf = requestAnimationFrame(tick);
 
-		measure();
-		window.addEventListener("scroll", onScroll, { passive: true });
-		window.addEventListener("resize", onScroll, { passive: true });
-		// Lenis smooth scroll does not always emit native scroll events — bridge from providers.
-		window.addEventListener("app-scroll", onScroll, { passive: true });
+		// Nudge on resize / Lenis bridge when layout shifts without a paint gap.
+		const onLayout = () => paintScrollScaleY();
+		window.addEventListener("resize", onLayout, { passive: true });
+		window.addEventListener("app-scroll", onLayout, { passive: true });
 
 		return () => {
-			window.removeEventListener("scroll", onScroll);
-			window.removeEventListener("resize", onScroll);
-			window.removeEventListener("app-scroll", onScroll);
+			cancelAnimationFrame(raf);
+			window.removeEventListener("resize", onLayout);
+			window.removeEventListener("app-scroll", onLayout);
 		};
 	}, [reveal, scrollBasis, scrollAnchor]);
 
@@ -152,11 +159,13 @@ export function DiaGradient({
 		// Measure this static shell — scaling the inner layer collapses its rect and locks progress at 0.
 		<div ref={measureRef} className="h-full w-full" aria-hidden>
 			<div
+				ref={scaleLayerRef}
 				style={{
 					height: "100%",
 					width: "100%",
 					transformOrigin: "bottom",
-					transform: `scaleY(${scaleY})`,
+					transform:
+						reveal === "scroll" ? "scaleY(0)" : `scaleY(${mountScaleY})`,
 					transition:
 						reveal === "mount"
 							? `transform ${riseMs}ms cubic-bezier(0.16, 1, 0.3, 1)`

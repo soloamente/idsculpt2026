@@ -36,7 +36,7 @@ const approachPillars = [
 export function DesignApproachSection() {
 	return (
 		<FadeSection
-			className="relative flex min-h-screen w-full flex-col items-center justify-center gap-20 text-balance bg-[#F7F7F7] px-4 pt-40 pb-8 md:gap-28"
+			className="relative flex min-h-screen w-full flex-col items-center justify-center gap-20 text-balance px-4 pt-40 pb-8 md:gap-28"
 			data-header-text="dark"
 			id="approach"
 		>
