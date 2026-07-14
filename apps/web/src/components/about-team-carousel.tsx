@@ -1,5 +1,9 @@
 "use client";
 
+import {
+	TeamCardShaderBackground,
+	type TeamCardShaderPalette,
+} from "@/components/about-team-card-shader";
 import { cn } from "@idsculpt/ui/lib/utils";
 import {
 	motion,
@@ -32,6 +36,9 @@ const TILT = {
 	spring: { stiffness: 220, damping: 24, mass: 0.6 }, // snappy, no wobble
 };
 
+/** Ignore small pointer movement so horizontal scroll drags don't count as clicks. */
+const CARD_CLICK_MOVE_PX = 6;
+
 /** Figma desktop 420×680; scales down on narrow viewports, full size from md up. */
 const TEAM_CARD_CLASS =
 	"relative isolate flex aspect-[420/680] w-[min(calc(100vw-3rem),300px)] max-w-[420px] shrink-0 flex-col gap-5 overflow-hidden rounded-3xl px-2.5 py-2.5 shadow-[inset_0_0_0_3px_rgba(255,255,255,0.13)] sm:w-[min(calc(100vw-4rem),340px)] md:w-[420px] md:gap-8";
@@ -47,8 +54,8 @@ export interface AboutTeamMember {
 	nameLines?: string[];
 	roles: string[];
 	quote: string;
-	/** Card backdrop — each member has a distinct gradient in Figma. */
-	cardClassName: string;
+	/** Animated Shader Lab backdrop — colors match each member's Figma card. */
+	shaderPalette: TeamCardShaderPalette;
 	imageBlend?: "hard-light" | "overlay" | "lighten" | "normal";
 }
 
@@ -58,7 +65,14 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 		name: "Daniele Pisani",
 		roles: ["Co-Founder", "marketing & Adv"],
 		quote: "“imagine, see, conquer”",
-		cardClassName: "bg-gradient-to-b from-[#1e4fd4] to-[#0b1538]",
+		shaderPalette: {
+			point1: "#1e4fd4",
+			point2: "#1240a0",
+			point3: "#0b1538",
+			fallbackFrom: "#1e4fd4",
+			fallbackTo: "#0b1538",
+			noiseSeed: 31.4,
+		},
 		imageBlend: "hard-light",
 	},
 	{
@@ -66,7 +80,14 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 		name: "Adam Adamu",
 		roles: ["Co-Founder", "designer"],
 		quote: "imagine, see, conquer",
-		cardClassName: "bg-gradient-to-br from-[#ff5a7a] to-[#6b1428]",
+		shaderPalette: {
+			point1: "#e63946",
+			point2: "#b91c1c",
+			point3: "#450a0a",
+			fallbackFrom: "#e63946",
+			fallbackTo: "#450a0a",
+			noiseSeed: 52.8,
+		},
 		imageBlend: "overlay",
 	},
 	{
@@ -74,7 +95,14 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 		name: "Anselmo Vicente",
 		roles: ["Web & Graphic Designer", "Motion designer"],
 		quote: "I wish my eyes could take photos.",
-		cardClassName: "bg-gradient-to-b from-[#2a4a8f] to-[#0a1028]",
+		shaderPalette: {
+			point1: "#3a3a3a",
+			point2: "#1a1a1a",
+			point3: "#050505",
+			fallbackFrom: "#3a3a3a",
+			fallbackTo: "#050505",
+			noiseSeed: 44.2,
+		},
 		imageBlend: "lighten",
 	},
 	{
@@ -83,7 +111,14 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 		nameLines: ["Annalaura", "Petruzzellis"],
 		roles: ["3D Artist & CGI"],
 		quote: "“imagine, see, conquer”",
-		cardClassName: "bg-gradient-to-br from-[#c9a227] to-[#4a3010]",
+		shaderPalette: {
+			point1: "#ff8fab",
+			point2: "#f06292",
+			point3: "#880e4f",
+			fallbackFrom: "#ff8fab",
+			fallbackTo: "#880e4f",
+			noiseSeed: 67.5,
+		},
 		imageBlend: "lighten",
 	},
 ];
@@ -91,6 +126,18 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 /** Glassy nav pill — same language as the site header. */
 const navPillClassnames =
 	"inline-flex items-center justify-center rounded-full border border-black/13 bg-black/35 backdrop-blur-[2px]";
+
+/** Shared square chip — same spring as gallery preview step dots. */
+const TEAM_DOT_INDICATOR = {
+	spring: {
+		bounce: 0,
+		damping: 34,
+		stiffness: 380,
+		type: "spring" as const,
+	},
+} as const;
+
+const TEAM_DOT_LAYOUT_ID = "about-team-carousel-dot";
 
 function SquareMarker({ className }: { className?: string }) {
 	return (
@@ -101,16 +148,24 @@ function SquareMarker({ className }: { className?: string }) {
 function TeamCard({
 	member,
 	activeProgress,
+	index,
+	onSelect,
 }: {
 	member: AboutTeamMember;
 	/** 0 = fully in the background, 1 = centered in focus. */
 	activeProgress: number;
+	index: number;
+	/** Desktop only — scroll the carousel to this card. */
+	onSelect: (index: number) => void;
 }) {
 	const nameLines = member.nameLines ?? [member.name];
 	const prefersReducedMotion = useReducedMotion();
+	// Track mouse press so a horizontal scroll drag is not treated as a card click.
+	const clickStartRef = useRef<{ x: number; y: number } | null>(null);
+	const clickCancelledRef = useRef(false);
 
-	// De-emphasize side cards with brightness, not opacity — opacity was tinting the grey field.
-	const focusBrightness = 0.6 + activeProgress * 0.4;
+	// De-emphasize side cards with a dim overlay — not CSS filter (breaks WebGL canvases).
+	const sideDimOpacity = (1 - activeProgress) * 0.32;
 
 	// Normalized pointer position over the card: 0 = left/top edge, 1 = right/bottom.
 	// Motion values commit straight to the DOM — no React re-render per mousemove.
@@ -140,7 +195,22 @@ function TeamCard({
 	);
 	const glareBackground = useMotionTemplate`radial-gradient(280px circle at ${glareX} ${glareY}, rgba(255,255,255,0.5), transparent 70%)`;
 
+	const handlePointerDown = (event: ReactPointerEvent<HTMLElement>) => {
+		if (event.pointerType === "mouse") {
+			clickStartRef.current = { x: event.clientX, y: event.clientY };
+			clickCancelledRef.current = false;
+		}
+	};
+
 	const handlePointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+		if (event.pointerType === "mouse" && clickStartRef.current) {
+			const dx = event.clientX - clickStartRef.current.x;
+			const dy = event.clientY - clickStartRef.current.y;
+			if (Math.hypot(dx, dy) > CARD_CLICK_MOVE_PX) {
+				clickCancelledRef.current = true;
+			}
+		}
+
 		if (
 			prefersReducedMotion ||
 			event.pointerType !== "mouse" ||
@@ -154,7 +224,20 @@ function TeamCard({
 		hoverProgress.set(1);
 	};
 
+	const handlePointerUp = (event: ReactPointerEvent<HTMLElement>) => {
+		if (
+			event.pointerType === "mouse" &&
+			!clickCancelledRef.current &&
+			activeProgress < 0.85
+		) {
+			onSelect(index);
+		}
+		clickStartRef.current = null;
+	};
+
 	const handlePointerLeave = () => {
+		clickStartRef.current = null;
+		clickCancelledRef.current = true;
 		pointerX.set(0.5);
 		pointerY.set(0.5);
 		hoverProgress.set(0);
@@ -187,12 +270,11 @@ function TeamCard({
 			{/* Perspective lives on a static wrapper so the tilt reads as 3D depth. */}
 			<div style={{ perspective: 1000 }}>
 				<motion.article
+					onPointerDown={handlePointerDown}
 					onPointerMove={handlePointerMove}
+					onPointerUp={handlePointerUp}
 					onPointerLeave={handlePointerLeave}
-					animate={{
-						filter: `brightness(${focusBrightness})`,
-					}}
-					transition={{ duration: 0.2, ease: "easeOut" }}
+					onPointerCancel={handlePointerUp}
 					style={
 						prefersReducedMotion
 							? undefined
@@ -204,8 +286,24 @@ function TeamCard({
 									backfaceVisibility: "hidden",
 								}
 					}
-					className={cn(TEAM_CARD_CLASS, member.cardClassName)}
+					className={cn(
+						TEAM_CARD_CLASS,
+						activeProgress < 0.85 && "md:cursor-pointer select-none",
+					)}
 				>
+					<TeamCardShaderBackground
+						memberKey={member.name}
+						mountIndex={index}
+						palette={member.shaderPalette}
+					/>
+					{/* Side cards dim via overlay — keeps WebGPU canvas off filtered ancestors. */}
+					<motion.div
+						aria-hidden
+						className="pointer-events-none absolute inset-0 z-15 rounded-3xl bg-black"
+						animate={{ opacity: sideDimOpacity }}
+						transition={{ duration: 0.2, ease: "easeOut" }}
+					/>
+					<div className="relative z-10 flex min-h-0 flex-1 flex-col gap-5 md:gap-8">
 					{/* Portrait — crossfade normal vs blend layers while scrolling between cards. */}
 					<div className="relative aspect-square w-full overflow-hidden rounded-xl md:rounded-[14px]">
 						{blendClassName ? (
@@ -260,9 +358,10 @@ function TeamCard({
 							))}
 						</div>
 					</div>
+					</div>
 
 					{/* Fixed from the card bottom so quotes align across 1- and 2-line names. */}
-					<p className="absolute inset-x-2.5 bottom-6 text-center font-semibold text-[16px] text-white capitalize md:bottom-10 md:text-[20px]">
+					<p className="absolute inset-x-2.5 bottom-6 z-10 text-center font-semibold text-[16px] text-white capitalize md:bottom-10 md:text-[20px]">
 						{member.quote}
 					</p>
 
@@ -270,7 +369,7 @@ function TeamCard({
 					{!prefersReducedMotion && (
 						<motion.div
 							aria-hidden
-							className="pointer-events-none absolute inset-0 rounded-3xl"
+							className="pointer-events-none absolute inset-0 z-20 rounded-3xl"
 							style={{ background: glareBackground, opacity: glareOpacity }}
 						/>
 					)}
@@ -301,9 +400,13 @@ function getCardActiveProgress(
 export function AboutTeamCarousel() {
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const [activeIndex, setActiveIndex] = useState(0);
+	const prefersReducedMotion = useReducedMotion();
 	const [cardProgress, setCardProgress] = useState<number[]>(() =>
 		TEAM_MEMBERS.map((_, index) => (index === 0 ? 1 : 0)),
 	);
+	const dotTransition = prefersReducedMotion
+		? { duration: 0 }
+		: TEAM_DOT_INDICATOR.spring;
 
 	const scrollToIndex = useCallback((index: number) => {
 		const container = scrollRef.current;
@@ -361,7 +464,9 @@ export function AboutTeamCarousel() {
 						<TeamCard
 							key={member.name}
 							member={member}
+							index={index}
 							activeProgress={cardProgress[index] ?? 0}
+							onSelect={scrollToIndex}
 						/>
 					))}
 				</div>
@@ -378,20 +483,38 @@ export function AboutTeamCarousel() {
 					</button>
 
 					<div className={cn(navPillClassnames, "px-5 py-4")}>
-						<div className="flex items-center gap-2.5">
-							{TEAM_MEMBERS.map((member, index) => (
-								<button
-									key={member.name}
-									type="button"
-									aria-label={`Go to ${member.name}`}
-									aria-current={index === activeIndex ? "true" : undefined}
-									className={cn(
-										"size-2 shrink-0 transition-colors",
-										index === activeIndex ? "bg-white" : "bg-white/40",
-									)}
-									onClick={() => scrollToIndex(index)}
-								/>
-							))}
+						<div
+							className="flex items-center gap-2.5"
+							role="tablist"
+							aria-label="Team members"
+						>
+							{TEAM_MEMBERS.map((member, index) => {
+								const isActive = index === activeIndex;
+								return (
+									<button
+										key={member.name}
+										type="button"
+										role="tab"
+										aria-selected={isActive}
+										aria-label={`Go to ${member.name}`}
+										className={cn(
+											"relative size-2 shrink-0 [-webkit-tap-highlight-color:transparent]",
+											!isActive && "bg-white/40",
+										)}
+										onClick={() => scrollToIndex(index)}
+									>
+										{/* Shared chip slides between squares — same pattern as gallery previews. */}
+										{isActive ? (
+											<motion.span
+												layoutId={TEAM_DOT_LAYOUT_ID}
+												aria-hidden
+												className="absolute inset-0 bg-white"
+												transition={dotTransition}
+											/>
+										) : null}
+									</button>
+								);
+							})}
 						</div>
 					</div>
 

@@ -5,8 +5,6 @@ import { SiteFooter } from "@/components/site-footer";
 import { WordStickersPlayground } from "@/components/word-stickers/word-stickers-playground";
 import {
 	CONTACT_EMAIL,
-	CONTACT_PHONE_DISPLAY,
-	CONTACT_PHONE_TEL,
 } from "@/lib/contact";
 /** Small square marker flanking centered copy — Figma about pattern. */
 function FlankedText({
@@ -28,12 +26,13 @@ function FlankedText({
 export default function About() {
 	/** Stessa pill del CTA Discover / header Email us, adattata a testo nero su sfondo chiaro. */
 	const contactPillClassnames =
-		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
+		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
 
 	return (
 		<main className="relative flex min-h-screen w-full flex-col overflow-hidden">
 			{/* Full-page sticker field — sits behind all sections, spans entire scroll height. */}
-			<WordStickersPlayground className="pointer-events-none absolute inset-0 z-0" />
+			{/* Above page sections (z-1/z-10) so hit targets receive drags; host stays pointer-events-none. */}
+			<WordStickersPlayground className="pointer-events-none absolute inset-0 z-20" />
 
 			<div className="relative z-1 flex flex-col gap-[165px]">
 				<FadeSection
@@ -74,20 +73,12 @@ export default function About() {
 				<h2 className="max-w-xs text-center font-medium text-2xl uppercase leading-tight">
 					Start your project with us
 				</h2>
-				<div className="flex flex-col items-center gap-3">
-					<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
-						<span className="inline-flex items-center gap-1">
-							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-							{CONTACT_EMAIL}
-						</span>
-					</a>
-					<a className={contactPillClassnames} href={`tel:${CONTACT_PHONE_TEL}`}>
-						<span className="inline-flex items-center gap-1">
-							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-							{CONTACT_PHONE_DISPLAY}
-						</span>
-					</a>
-				</div>
+				<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
+					<span className="inline-flex items-center gap-1">
+						<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+						Email Us
+					</span>
+				</a>
 			</FadeSection>
 
 			<SiteFooter />

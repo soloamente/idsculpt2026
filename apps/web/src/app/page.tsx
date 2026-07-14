@@ -7,8 +7,6 @@ import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { HeroShaderBackground } from "@/components/hero-shader-background";
 import {
 	CONTACT_EMAIL,
-	CONTACT_PHONE_DISPLAY,
-	CONTACT_PHONE_TEL,
 } from "@/lib/contact";
 
 export default function Home() {
@@ -29,9 +27,17 @@ export default function Home() {
 
 	const socialClassnames =
 		"hover:scale-98 hover:opacity-50 transition-all duration-200 ease-in-out will-change-transform";
+	/** Work preview cards — soft transform easing (same curve as DiaGradient rise). */
+	const workPreviewEase =
+		"duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+	const workPreviewClassnames = "group flex w-full flex-col gap-3 select-none";
+	const workPreviewImageClassnames =
+		`relative aspect-square w-full overflow-hidden rounded-2xl transition-transform ${workPreviewEase} will-change-transform group-hover:scale-[0.98]`;
+	const workPreviewCaptionClassnames =
+		`text-center uppercase transition-opacity ${workPreviewEase} group-hover:opacity-70`;
 	/** Stessa pill del CTA Discover / header Email us, adattata a testo nero su sfondo chiaro. */
 	const contactPillClassnames =
-		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
+		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
 	// Frammenti hero: l'effetto blur graduale (sopra → sotto) vale solo su `heroBrand` (i glifi sfocano davvero via `filter: blur` sullo strato mascherato).
 	const heroHeadlineBefore = "Welcome to ";
 	const heroBrand = "Identity/Sculpt";
@@ -67,6 +73,7 @@ export default function Home() {
 				</h1>
 				{/* Stessa identità del CTA header “Email us”: pill vetrosa + quadrato + label; scroll alla sezione work. */}
 				<Link
+					id="hero-discover"
 					className="relative z-10 inline-flex items-center rounded-full border border-black/10 bg-black/40 px-5 py-2.5 font-medium text-sm backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50"
 					href="#work"
 				>
@@ -92,12 +99,14 @@ export default function Home() {
 				</div>
 				<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
 					{works.map((work, index) => (
-						<article
+						<Link
 							key={`${work.image}-${index}`}
-							className="flex w-full flex-col gap-3"
+							aria-label={`View ${work.title} in gallery`}
+							className={workPreviewClassnames}
+							href="/gallery"
 						>
 							{/* Same square footprint as the old wrapper; only the image lives inside. */}
-							<div className="relative aspect-square w-full overflow-hidden rounded-2xl">
+							<div className={workPreviewImageClassnames}>
 								<Image
 									src={work.image}
 									alt={work.alt}
@@ -107,17 +116,11 @@ export default function Home() {
 									width={5000}
 								/>
 							</div>
-							<div className="flex flex-col items-start gap-1.5">
-								<span
-									aria-hidden
-									className="mt-[0.35em] size-[0.4em] shrink-0 bg-black text-current"
-								/>
-								<div className="text-left font-semibold text-lg capitalize">
-									<h3 className="font-semibold">{work.title}</h3>
-									<p className="opacity-50">{work.type}</p>
-								</div>
+							<div className={workPreviewCaptionClassnames}>
+								<h3 className="font-medium opacity-50">{work.title}</h3>
+								<p className="text-xs opacity-25">{work.type}</p>
 							</div>
-						</article>
+						</Link>
 					))}
 				</div>
 			</FadeSection>
@@ -132,20 +135,12 @@ export default function Home() {
 				<h2 className="max-w-xs text-center font-medium text-2xl uppercase leading-tight">
 					Start your project with us
 				</h2>
-				<div className="flex flex-col items-center gap-3">
-					<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
-						<span className="inline-flex items-center gap-1">
-							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-							{CONTACT_EMAIL}
-						</span>
-					</a>
-					<a className={contactPillClassnames} href={`tel:${CONTACT_PHONE_TEL}`}>
-						<span className="inline-flex items-center gap-1">
-							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-							{CONTACT_PHONE_DISPLAY}
-						</span>
-					</a>
-				</div>
+				<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
+					<span className="inline-flex items-center gap-1">
+						<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+						Email Us
+					</span>
+				</a>
 			</FadeSection>
 
 			<FadeFooter

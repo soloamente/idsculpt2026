@@ -7,8 +7,6 @@ import { GalleryPageContent } from "@/components/gallery-page-content";
 import type { GalleryProject } from "@/components/gallery-project-card";
 import {
 	CONTACT_EMAIL,
-	CONTACT_PHONE_DISPLAY,
-	CONTACT_PHONE_TEL,
 } from "@/lib/contact";
 
 /** Portfolio projects — set `isCaseStudy: true` when a deep-dive is ready to publish. */
@@ -77,7 +75,7 @@ export default function Gallery() {
 	const socialClassnames =
 		"hover:scale-98 hover:opacity-50 transition-all duration-200 ease-in-out will-change-transform";
 	const contactPillClassnames =
-		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
+		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
 
 	return (
 		<main className="relative min-h-screen overflow-hidden">
@@ -93,20 +91,12 @@ export default function Gallery() {
 				<h2 className="max-w-xs text-center font-medium text-2xl uppercase leading-tight">
 					Start your project with us
 				</h2>
-				<div className="flex flex-col items-center gap-3">
-					<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
-						<span className="inline-flex items-center gap-1">
-							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-							{CONTACT_EMAIL}
-						</span>
-					</a>
-					<a className={contactPillClassnames} href={`tel:${CONTACT_PHONE_TEL}`}>
-						<span className="inline-flex items-center gap-1">
-							<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-							{CONTACT_PHONE_DISPLAY}
-						</span>
-					</a>
-				</div>
+				<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
+					<span className="inline-flex items-center gap-1">
+						<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+						Email Us
+					</span>
+				</a>
 			</FadeSection>
 
 			<FadeFooter
