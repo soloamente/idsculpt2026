@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DesignApproachSection } from "@/components/design-approach-section";
 import { DesignTasteBentoSection } from "@/components/design-taste-bento-section";
 import { FadeFooter, FadeSection } from "@/components/fade-section";
+import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { siteFooterShellClassnames } from "@/components/site-footer";
 import { HeroShaderBackground } from "@/components/hero-shader-background";
 import {
@@ -126,6 +127,7 @@ export default function Home() {
 			</FadeSection>
 			<DesignApproachSection />
 			<DesignTasteBentoSection />
+			<FooterDiaGradient />
 			<FadeSection
 				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 text-pretty px-4 pt-40 pb-8 text-black"
 				data-header-text="dark"

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FadeFooter, FadeSection } from "@/components/fade-section";
+import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { siteFooterShellClassnames } from "@/components/site-footer";
 import { GalleryPageContent } from "@/components/gallery-page-content";
 import type { GalleryProject } from "@/components/gallery-project-card";
@@ -80,6 +81,8 @@ export default function Gallery() {
 	return (
 		<main className="relative min-h-screen overflow-x-hidden">
 			<GalleryPageContent projects={galleryProjects} />
+
+			<FooterDiaGradient />
 
 			<FadeSection
 				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 px-4 pt-40 pb-8 text-black"

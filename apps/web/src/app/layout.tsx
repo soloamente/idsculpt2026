@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "../index.css";
-import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import Header from "@/components/header";
 import Providers from "@/components/providers";
 import { SitePreloader } from "@/components/site-preloader";
@@ -47,8 +46,6 @@ export default function RootLayout({
 							{children}
 						</div>
 					</SitePreloader>
-					{/* Sibling of preloader shell — true viewport-fixed, no transform/overflow ancestors. */}
-					<FooterDiaGradient />
 				</Providers>
 			</body>
 		</html>
