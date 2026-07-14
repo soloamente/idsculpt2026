@@ -37,12 +37,14 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 		};
 		syncHostSize();
 
-		const parentRo =
-			parent &&
-			new ResizeObserver(() => {
+		let parentRo: ResizeObserver | undefined;
+		if (parent) {
+			// Observe only when parent exists — TS narrows null before observe().
+			parentRo = new ResizeObserver(() => {
 				syncHostSize();
 			});
-		parentRo?.observe(parent);
+			parentRo.observe(parent);
+		}
 
 		const boot = async () => {
 			await warmStickerFonts(STICKERS);
