@@ -3,7 +3,7 @@ import Link from "next/link";
 import { DesignApproachSection } from "@/components/design-approach-section";
 import { DesignTasteBentoSection } from "@/components/design-taste-bento-section";
 import { FadeFooter, FadeSection } from "@/components/fade-section";
-import { FooterDiaGradient } from "@/components/footer-dia-gradient";
+import { siteFooterShellClassnames } from "@/components/site-footer";
 import { HeroShaderBackground } from "@/components/hero-shader-background";
 import {
 	CONTACT_EMAIL,
@@ -44,7 +44,7 @@ export default function Home() {
 	const heroHeadlineAfter =
 		", a lively brand design studio in Italy. We focus on creating unique visual identities, driven by our passion for design and commitment to excellence.";
 	return (
-		<main className="relative min-h-screen overflow-hidden">
+		<main className="relative min-h-screen overflow-x-hidden">
 			{/* data-header-text drives fixed nav color when this band is under the header sample line. */}
 			<FadeSection
 				className="relative flex min-h-screen w-full flex-col items-center justify-center gap-8 text-pretty px-4 pt-40 pb-8 text-white uppercase"
@@ -126,7 +126,6 @@ export default function Home() {
 			</FadeSection>
 			<DesignApproachSection />
 			<DesignTasteBentoSection />
-			<FooterDiaGradient />
 			<FadeSection
 				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 text-pretty px-4 pt-40 pb-8 text-black"
 				data-header-text="dark"
@@ -144,7 +143,7 @@ export default function Home() {
 			</FadeSection>
 
 			<FadeFooter
-				className="relative z-10 flex w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-8 text-white uppercase"
+				className={siteFooterShellClassnames}
 				data-header-text="light"
 				id="site-footer"
 			>

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FadeFooter, FadeSection } from "@/components/fade-section";
-import { FooterDiaGradient } from "@/components/footer-dia-gradient";
+import { siteFooterShellClassnames } from "@/components/site-footer";
 import { GalleryPageContent } from "@/components/gallery-page-content";
 import type { GalleryProject } from "@/components/gallery-project-card";
 import {
@@ -78,10 +78,8 @@ export default function Gallery() {
 		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
 
 	return (
-		<main className="relative min-h-screen overflow-hidden">
+		<main className="relative min-h-screen overflow-x-hidden">
 			<GalleryPageContent projects={galleryProjects} />
-
-			<FooterDiaGradient />
 
 			<FadeSection
 				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 px-4 pt-40 pb-8 text-black"
@@ -100,7 +98,7 @@ export default function Gallery() {
 			</FadeSection>
 
 			<FadeFooter
-				className="relative z-10 flex w-full flex-col items-center justify-center gap-4 px-4 pt-40 pb-8 text-white uppercase"
+				className={siteFooterShellClassnames}
 				data-header-text="light"
 				id="site-footer"
 			>

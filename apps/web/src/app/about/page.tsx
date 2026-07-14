@@ -1,6 +1,5 @@
 import { AboutTeamCarousel } from "@/components/about-team-carousel";
 import { FadeInSection, FadeSection } from "@/components/fade-section";
-import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { SiteFooter } from "@/components/site-footer";
 import { WordStickersPlayground } from "@/components/word-stickers/word-stickers-playground";
 import {
@@ -29,7 +28,7 @@ export default function About() {
 		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
 
 	return (
-		<main className="relative flex min-h-screen w-full flex-col overflow-hidden">
+		<main className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
 			{/* Full-page sticker field — sits behind all sections, spans entire scroll height. */}
 			{/* Above page sections (z-1/z-10) so hit targets receive drags; host stays pointer-events-none. */}
 			<WordStickersPlayground className="pointer-events-none absolute inset-0 z-20" />
@@ -64,7 +63,6 @@ export default function About() {
 
 			<AboutTeamCarousel />
 
-			<FooterDiaGradient />
 			<FadeSection
 				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 text-pretty px-4 pt-40 pb-8 text-black"
 				data-header-text="dark"

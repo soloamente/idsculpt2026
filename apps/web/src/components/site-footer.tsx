@@ -6,11 +6,15 @@ import { FadeFooter } from "@/components/fade-section";
 const socialClassnames =
 	"hover:scale-98 hover:opacity-50 transition-all duration-200 ease-in-out will-change-transform";
 
+/** Shared shell — safe-area padding keeps copy/logo above the mobile browser chrome. */
+export const siteFooterShellClassnames =
+	"relative z-10 flex w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-[max(2rem,env(safe-area-inset-bottom,0px))] text-white uppercase";
+
 /** Shared site footer — homepage markup (copyright, socials, full-width logo). */
 export function SiteFooter() {
 	return (
 		<FadeFooter
-			className="relative z-10 flex w-full flex-col items-center justify-center gap-4 text-pretty px-4 pt-40 pb-8 text-white uppercase"
+			className={siteFooterShellClassnames}
 			data-header-text="light"
 			id="site-footer"
 		>

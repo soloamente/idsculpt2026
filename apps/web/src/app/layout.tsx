@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "../index.css";
+import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import Header from "@/components/header";
 import Providers from "@/components/providers";
 import { SitePreloader } from "@/components/site-preloader";
@@ -21,6 +22,11 @@ export const metadata: Metadata = {
 	description: "idsculpt",
 };
 
+/** Lets `env(safe-area-inset-*)` reach the real screen edges on iOS. */
+export const viewport: Viewport = {
+	viewportFit: "cover",
+};
+
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -37,8 +43,11 @@ export default function RootLayout({
 						{/* Use min-height so pages can grow taller than viewport and remain scrollable. */}
 						<div className="grid min-h-svh grid-rows-[auto_1fr]">
 							<Header />
-							{children}
+							{/* min-h-min: grid row grows with page content instead of clipping overflow. */}
+							<div className="relative min-h-min w-full">{children}</div>
 						</div>
+						{/* Outside page `<main>` so overflow-hidden never clips the fixed glow. */}
+						<FooterDiaGradient />
 					</SitePreloader>
 				</Providers>
 			</body>
