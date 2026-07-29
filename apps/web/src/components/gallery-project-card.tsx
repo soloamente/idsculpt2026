@@ -191,7 +191,7 @@ export function GalleryProjectCard({ project }: { project: GalleryProject }) {
 								fill
 								className="object-contain object-center"
 								sizes="(max-width: 768px) 100vw, 50vw"
-								unoptimized
+								unoptimized={process.env.NODE_ENV === "development"}
 							/>
 						</motion.div>
 					</AnimatePresence>

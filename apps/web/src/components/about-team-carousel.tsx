@@ -63,8 +63,8 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 	{
 		image: "/images/daniele.png",
 		name: "Daniele Pisani",
-		roles: ["Co-Founder", "marketing & Adv"],
-		quote: "“imagine, see, conquer”",
+		roles: ["Founder", "Managing Director"],
+		quote: "“Vision. Strategy. Impact.”",
 		shaderPalette: {
 			point1: "#1e4fd4",
 			point2: "#1240a0",
@@ -78,8 +78,8 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 	{
 		image: "/images/adam.png",
 		name: "Adam Adamu",
-		roles: ["Co-Founder", "designer"],
-		quote: "imagine, see, conquer",
+		roles: ["Co-Founder", "Creative Director"],
+		quote: "“life is all the inspiration you need”",
 		shaderPalette: {
 			point1: "#e63946",
 			point2: "#b91c1c",
@@ -92,9 +92,9 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 	},
 	{
 		image: "/images/about/anselmo.png",
-		name: "Anselmo Vicente",
-		roles: ["Web & Graphic Designer", "Motion designer"],
-		quote: "I wish my eyes could take photos.",
+		name: "ADGV",
+		roles: ["Digital Sculptor", "Multidisciplinary Designer"],
+		quote: "“I wish my eyes could take photos”",
 		shaderPalette: {
 			point1: "#3a3a3a",
 			point2: "#1a1a1a",
@@ -108,9 +108,9 @@ const TEAM_MEMBERS: AboutTeamMember[] = [
 	{
 		image: "/images/annalaura.png",
 		name: "Annalaura Petruzzellis",
-		nameLines: ["Annalaura", "Petruzzellis"],
-		roles: ["3D Artist & CGI"],
-		quote: "“imagine, see, conquer”",
+		nameLines: ["Annalaura"],
+		roles: ["Digital Sculptor", "3D Artist & CGI"],
+		quote: "“Giving form to unseen ideas”",
 		shaderPalette: {
 			point1: "#ff8fab",
 			point2: "#f06292",
@@ -150,6 +150,7 @@ function TeamCard({
 	activeProgress,
 	index,
 	onSelect,
+	sectionVisible,
 }: {
 	member: AboutTeamMember;
 	/** 0 = fully in the background, 1 = centered in focus. */
@@ -157,6 +158,8 @@ function TeamCard({
 	index: number;
 	/** Desktop only — scroll the carousel to this card. */
 	onSelect: (index: number) => void;
+	/** Team section intersects the viewport — pauses WebGPU when scrolled away. */
+	sectionVisible: boolean;
 }) {
 	const nameLines = member.nameLines ?? [member.name];
 	const prefersReducedMotion = useReducedMotion();
@@ -264,6 +267,9 @@ function TeamCard({
 	// Portrait layers share the same crop; crossfade avoids blend-mode pop on focus change.
 	const portraitClassName = "object-cover object-bottom";
 
+	// Side cards keep a static shader frame — only the centered card runs motion + cursor follow.
+	const shaderMotionActive = activeProgress > 0.45;
+
 	return (
 		// Extra padding on the slot so scale + tilt are not clipped by the scroll row.
 		<div className="flex shrink-0 snap-center items-center justify-center px-2 py-6 md:px-3 md:py-10">
@@ -294,7 +300,9 @@ function TeamCard({
 					<TeamCardShaderBackground
 						memberKey={member.name}
 						mountIndex={index}
+						motionActive={shaderMotionActive}
 						palette={member.shaderPalette}
+						sectionVisible={sectionVisible}
 					/>
 					{/* Side cards dim via overlay — keeps WebGPU canvas off filtered ancestors. */}
 					<motion.div
@@ -304,60 +312,58 @@ function TeamCard({
 						transition={{ duration: 0.2, ease: "easeOut" }}
 					/>
 					<div className="relative z-10 flex min-h-0 flex-1 flex-col gap-5 md:gap-8">
-					{/* Portrait — crossfade normal vs blend layers while scrolling between cards. */}
-					<div className="relative aspect-square w-full overflow-hidden rounded-xl md:rounded-[14px]">
-						{blendClassName ? (
+						{/* Portrait — crossfade normal vs blend layers while scrolling between cards. */}
+						<div className="relative aspect-square w-full overflow-hidden rounded-xl md:rounded-[14px]">
+							{blendClassName ? (
+								<motion.div
+									aria-hidden
+									className={cn("absolute inset-0", blendClassName)}
+									animate={{ opacity: 1 - activeProgress }}
+									transition={{ duration: 0.25, ease: "easeOut" }}
+								>
+									<Image
+										src={member.image}
+										alt=""
+										fill
+										className={portraitClassName}
+										sizes="(max-width: 768px) 85vw, 420px"
+										unoptimized={process.env.NODE_ENV === "development"}
+									/>
+								</motion.div>
+							) : null}
 							<motion.div
-								aria-hidden
-								className={cn("absolute inset-0", blendClassName)}
-								animate={{ opacity: 1 - activeProgress }}
+								className="absolute inset-0"
+								animate={{ opacity: blendClassName ? activeProgress : 1 }}
 								transition={{ duration: 0.25, ease: "easeOut" }}
 							>
 								<Image
 									src={member.image}
-									alt=""
+									alt={member.name}
 									fill
 									className={portraitClassName}
 									sizes="(max-width: 768px) 85vw, 420px"
-									unoptimized
+									unoptimized={process.env.NODE_ENV === "development"}
 								/>
 							</motion.div>
-						) : null}
-						<motion.div
-							className="absolute inset-0"
-							animate={{ opacity: blendClassName ? activeProgress : 1 }}
-							transition={{ duration: 0.25, ease: "easeOut" }}
-						>
-							<Image
-								src={member.image}
-								alt={member.name}
-								fill
-								className={portraitClassName}
-								sizes="(max-width: 768px) 85vw, 420px"
-								unoptimized
-							/>
-						</motion.div>
-					</div>
+						</div>
 
-					<div className="flex flex-col items-center gap-4 md:gap-8">
-						<div className="flex items-center gap-4 md:gap-6">
-							<SquareMarker />
-							<div className="text-center font-semibold text-[20px] text-white uppercase leading-tight md:text-[26px]">
-								{nameLines.map((line) => (
-									<p key={line}>{line}</p>
+						<div className="flex flex-col items-center gap-4 md:gap-8">
+							<div className="flex items-center gap-4 md:gap-6">
+								<SquareMarker />
+								<div className="text-center font-semibold text-[20px] text-white uppercase leading-tight md:text-[26px]">
+									{nameLines.map((line) => (
+										<p key={line}>{line}</p>
+									))}
+								</div>
+								<SquareMarker />
+							</div>
+
+							<div className="flex w-full flex-col gap-0 text-center font-normal text-[18px] text-white/40 capitalize leading-tight md:text-[26px]">
+								{member.roles.map((role) => (
+									<p key={role}>{role}</p>
 								))}
 							</div>
-							<SquareMarker />
 						</div>
-
-						<div className="flex w-full flex-col gap-1 text-center font-normal text-[18px] text-white/40 capitalize md:text-[26px]">
-							{member.roles.map((role) => (
-								<p key={role} className="min-h-[1em]">
-									{role}
-								</p>
-							))}
-						</div>
-					</div>
 					</div>
 
 					{/* Fixed from the card bottom so quotes align across 1- and 2-line names. */}
@@ -398,8 +404,10 @@ function getCardActiveProgress(
 
 /** Horizontal team carousel with edge fades and pill navigation. */
 export function AboutTeamCarousel() {
+	const sectionRef = useRef<HTMLElement>(null);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const [activeIndex, setActiveIndex] = useState(0);
+	const [sectionVisible, setSectionVisible] = useState(false);
 	const prefersReducedMotion = useReducedMotion();
 	const [cardProgress, setCardProgress] = useState<number[]>(() =>
 		TEAM_MEMBERS.map((_, index) => (index === 0 ? 1 : 0)),
@@ -417,6 +425,24 @@ export function AboutTeamCarousel() {
 		const offset =
 			card.offsetLeft - (container.clientWidth - card.clientWidth) / 2;
 		container.scrollTo({ left: offset, behavior: "smooth" });
+	}, []);
+
+	// Pause all card shaders when the carousel scrolls off-screen (avoids WebGPU wake-up jank).
+	useEffect(() => {
+		const section = sectionRef.current;
+		if (!section) {
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				setSectionVisible(entry?.isIntersecting ?? false);
+			},
+			// Hysteresis — don't flip at the exact section edge while scrolling.
+			{ rootMargin: "20% 0px", threshold: 0.05 },
+		);
+		observer.observe(section);
+		return () => observer.disconnect();
 	}, []);
 
 	// Interpolate focus per card while scrolling — avoids snapping opacity/blend.
@@ -448,6 +474,7 @@ export function AboutTeamCarousel() {
 
 	return (
 		<section
+			ref={sectionRef}
 			className="relative z-1 mt-20 w-full py-16 md:mt-[165px] md:py-32"
 			data-header-text="dark"
 			id="about-team"
@@ -467,6 +494,7 @@ export function AboutTeamCarousel() {
 							index={index}
 							activeProgress={cardProgress[index] ?? 0}
 							onSelect={scrollToIndex}
+							sectionVisible={sectionVisible}
 						/>
 					))}
 				</div>

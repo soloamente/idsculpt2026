@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@idsculpt/ui/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { type ReactNode, useEffect, useState } from "react";
 
+import { FilmGrainOverlay } from "@/components/film-grain-overlay";
 import { GradientWaveText } from "@/components/gradient-wave-text";
 
 /** Easing from the reference preloader — strong ease-out for the curtain lift. */
@@ -62,14 +62,8 @@ export function SitePreloader({ children }: SitePreloaderProps) {
 			}
 		>
 			{/* Grana che copre tutto il guscio (sibling di `motion`, non dentro) e scrolla con la pagina: `absolute` al wrapper `relative` invece di `fixed` al viewport. */}
-			{!showPreloader && (
-				<div
-					aria-hidden
-					className={cn(
-						"pointer-events-none absolute inset-0 z-30 min-h-0 w-full bg-[url('/images/overlay/bg-noize.png')] bg-auto bg-repeat opacity-70 mix-blend-overlay",
-					)}
-				/>
-			)}
+			{/* SVG grain — avoids downloading the legacy 7.5MB `bg-noize.png` tile on every visit. */}
+			{!showPreloader && <FilmGrainOverlay />}
 			<AnimatePresence
 				initial={false}
 				mode="popLayout"

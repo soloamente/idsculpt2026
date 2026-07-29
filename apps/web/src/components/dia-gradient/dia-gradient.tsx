@@ -131,22 +131,16 @@ export function DiaGradient({
 			return () => cancelAnimationFrame(id);
 		}
 
-		// Continuous rAF — mobile momentum scroll can skip sparse scroll/app-scroll events.
-		let raf = 0;
-		const tick = () => {
-			paintScrollScaleY();
-			raf = requestAnimationFrame(tick);
-		};
-		paintScrollScaleY();
-		raf = requestAnimationFrame(tick);
-
-		// Nudge on resize / Lenis bridge when layout shifts without a paint gap.
+		// Scroll-linked reveal: paint on scroll events instead of a dedicated rAF loop.
+		// Lenis (desktop) and native scroll both bridge via `app-scroll` / `scroll`.
 		const onLayout = () => paintScrollScaleY();
+		paintScrollScaleY();
+		window.addEventListener("scroll", onLayout, { passive: true });
 		window.addEventListener("resize", onLayout, { passive: true });
 		window.addEventListener("app-scroll", onLayout, { passive: true });
 
 		return () => {
-			cancelAnimationFrame(raf);
+			window.removeEventListener("scroll", onLayout);
 			window.removeEventListener("resize", onLayout);
 			window.removeEventListener("app-scroll", onLayout);
 		};

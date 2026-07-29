@@ -12,7 +12,7 @@ import {
 	type ShaderLabConfig,
 } from "@basementstudio/shader-lab";
 import { useReducedMotion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Must match the Discover link id on the homepage hero. */
 export const HERO_DISCOVER_ID = "hero-discover";
@@ -138,11 +138,15 @@ function lerp(a: number, b: number, t: number) {
 
 export function HeroShaderBackground() {
 	const shellRef = useRef<HTMLDivElement>(null);
+	const shaderShellRef = useRef<HTMLDivElement>(null);
 	const prefersReducedMotion = useReducedMotion();
+	const [useShader, setUseShader] = useState(false);
 	const finePointerRef = useRef(false);
 	const heroHoverRef = useRef(false);
 	const discoverHoverRef = useRef(false);
 	const cursorRef = useRef<[number, number]>([0, 0]);
+	/** Pause cursor follow when the hero band leaves the viewport (shader stays mounted). */
+	const heroVisibleRef = useRef(true);
 	const smoothedRef = useRef({
 		p1x: BASE_POINT1[0],
 		p1y: BASE_POINT1[1],
@@ -159,10 +163,58 @@ export function HeroShaderBackground() {
 		const media = window.matchMedia("(hover: hover) and (pointer: fine)");
 		const sync = () => {
 			finePointerRef.current = media.matches;
+			if (!prefersReducedMotion) {
+				setUseShader(media.matches);
+			}
 		};
 		sync();
 		media.addEventListener("change", sync);
 		return () => media.removeEventListener("change", sync);
+	}, [prefersReducedMotion]);
+
+	// Stable handler — remounting ShaderLabComposition re-initializes WebGPU (multi-second jank).
+	const handleRuntimeError = useCallback((message: string | null) => {
+		if (message) {
+			console.error("[HeroShaderBackground]", message);
+		}
+	}, []);
+
+	// Pause cursor follow when the hero scrolls off-screen; keep shader mounted to avoid WebGPU re-init.
+	useEffect(() => {
+		const hero =
+			document.getElementById("hero") ?? shellRef.current?.parentElement;
+		if (!hero) {
+			return;
+		}
+
+		const setShaderMotion = (active: boolean) => {
+			const params = getGradientParams();
+			if (!params) {
+				return;
+			}
+			// Reduce GPU work off-screen without tearing down the WebGPU context.
+			params.animate = active;
+			params.motionAmount = active ? smoothedRef.current.motion : 0;
+		};
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				const visible = entry?.isIntersecting ?? false;
+				heroVisibleRef.current = visible;
+				if (shaderShellRef.current) {
+					shaderShellRef.current.style.visibility = visible ? "visible" : "hidden";
+				}
+				setShaderMotion(visible);
+				if (!visible) {
+					heroHoverRef.current = false;
+					discoverHoverRef.current = false;
+				}
+			},
+			// Hysteresis: don't flip state at the exact hero edge while scrolling.
+			{ rootMargin: "20% 0px", threshold: 0.05 },
+		);
+		observer.observe(hero);
+		return () => observer.disconnect();
 	}, []);
 
 	// Hero — cursor follow anywhere on the band (events bubble from headline / Discover).
@@ -257,6 +309,11 @@ export function HeroShaderBackground() {
 
 		let raf = 0;
 		const tick = () => {
+			if (!heroVisibleRef.current) {
+				raf = requestAnimationFrame(tick);
+				return;
+			}
+
 			const params = getGradientParams();
 			const smoothed = smoothedRef.current;
 			const cursor = cursorRef.current;
@@ -332,14 +389,18 @@ export function HeroShaderBackground() {
 			className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
 		>
 			<div className="absolute inset-0 bg-linear-to-b from-[#615E63] via-[#AEA8A1] to-[#424042]" />
-			<div className="absolute inset-0 size-full [&_canvas]:size-full [&_canvas]:object-cover">
-				<ShaderLabComposition
-					config={heroShaderConfig}
-					onRuntimeError={(message) => {
-						console.error("[HeroShaderBackground]", message);
-					}}
-				/>
-			</div>
+			{/* WebGPU shader stays mounted after first load — unmounting forces a costly re-init on scroll back. */}
+			{useShader && (
+				<div
+					ref={shaderShellRef}
+					className="absolute inset-0 size-full [&_canvas]:size-full [&_canvas]:object-cover"
+				>
+					<ShaderLabComposition
+						config={heroShaderConfig}
+						onRuntimeError={handleRuntimeError}
+					/>
+				</div>
+			)}
 			{/* Bottom scrim — mask feathers the top edge so no hard band where fade begins. */}
 			<div
 				aria-hidden

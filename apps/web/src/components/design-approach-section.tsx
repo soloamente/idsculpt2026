@@ -3,28 +3,27 @@ import Image from "next/image";
 import { FadeInSection, FadeSection } from "@/components/fade-section";
 
 /** Piccolo quadrato nero come nel mock (titoli, intro, accenti ai lati). */
-const approachSquareClassnames =
-	"size-[0.4em] shrink-0 bg-black text-current";
+const approachSquareClassnames = "size-[0.4em] shrink-0 bg-black text-current";
 
 const approachPillars = [
 	{
-		title: "Curation",
+		title: "Strategic Thinking",
 		description:
-			"Every project starts with deep research into strategy, meaning, perception to define the aesthetics",
+			"Every brand starts with clarity, not assumptions. We research your market, audience and positioning before making a single creative decision",
 		image: "/images/sec3.png",
 		alt: "Classical sculpture study for brand curation",
 	},
 	{
-		title: "Brand Sculpting",
+		title: "Purposeful Design",
 		description:
 			"Failure is a great way to explore different ideas, not intended as not completing the project, but as a way to try more in order to obtain the perfect way to communicate",
 		image: "/images/Frame 147.png",
 		alt: "Still-life study for brand sculpting",
 	},
 	{
-		title: "Mixed Media",
+		title: "Consistent Execution",
 		description:
-			'Through curation and various attempts, we can determine how to synergistically blend different types of media to breathe life into the identities we sculpt. "Sculpting" means to select the right aspects to carve out, ultimately achieving a complete figure of "identity."',
+			"A strong identity only works when applied consistently.From digital experiences to every customer touchpoint, we ensure your brand stays coherent everywhere",
 		image: "/images/Frame 148.png",
 		alt: "Textured mixed-media reference",
 	},
@@ -42,7 +41,7 @@ export function DesignApproachSection() {
 		>
 			<div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8">
 				<h2 className="text-center font-bold text-3xl uppercase leading-tight">
-					Our approach is based on three pillars
+					THE SCULPTING METHOD
 				</h2>
 
 				{/* Intro centrata con quadrati ai lati del testo + accenti agli estremi della riga. */}
@@ -55,11 +54,12 @@ export function DesignApproachSection() {
 						aria-hidden
 						className={`absolute top-1/2 right-0 -translate-y-1/2 ${approachSquareClassnames}`}
 					/>
-					<div className="flex max-w-md items-center justify-center gap-3">
+					<div className="flex max-w-lg items-center justify-center gap-3">
 						<span aria-hidden className={approachSquareClassnames} />
 						<p className="text-center text-base">
-							Visually stunning, interactive website made to assert your digital
-							dominance and captivate.
+							Every identity we create is shaped through a clear method built on
+							three pillars: strategic thinking, purposeful design and
+							consistent execution.
 						</p>
 						<span aria-hidden className={approachSquareClassnames} />
 					</div>
@@ -80,7 +80,7 @@ export function DesignApproachSection() {
 								className="size-full object-cover"
 								fill
 								sizes="(max-width: 768px) 100vw, 33vw"
-								unoptimized
+								unoptimized={process.env.NODE_ENV === "development"}
 							/>
 						</div>
 

@@ -1,11 +1,9 @@
+import { ContactSectionPills } from "@/components/contact-section-pills";
 import { AboutTeamCarousel } from "@/components/about-team-carousel";
 import { FadeInSection, FadeSection } from "@/components/fade-section";
 import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { SiteFooter } from "@/components/site-footer";
 import { WordStickersPlayground } from "@/components/word-stickers/word-stickers-playground";
-import {
-	CONTACT_EMAIL,
-} from "@/lib/contact";
 /** Small square marker flanking centered copy — Figma about pattern. */
 function FlankedText({
 	children,
@@ -24,10 +22,6 @@ function FlankedText({
 }
 
 export default function About() {
-	/** Stessa pill del CTA Discover / header Email us, adattata a testo nero su sfondo chiaro. */
-	const contactPillClassnames =
-		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
-
 	return (
 		<main className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
 			{/* Full-page sticker field — sits behind all sections, spans entire scroll height. */}
@@ -43,23 +37,18 @@ export default function About() {
 					<FadeInSection className="flex max-w-[829px] flex-col items-center gap-4 text-center">
 						<p className="text-base text-black/50">about</p>
 						<h1 className="font-medium text-[32px] text-[#202020] leading-normal">
-							write some lines about teamwork
+							ONE TEAM. ONE VISION.
 						</h1>
 					</FadeInSection>
 
 					<FadeInSection className="w-full max-w-3xl">
 						<FlankedText className="max-w-[462px] text-center font-light text-[23px] text-black normal-case leading-normal">
-							Visually stunning, interactive website made to assert your digital
-							dominance and captivate.
+							Exceptional brands aren't built by individuals. They're sculpted
+							through collaboration, where strategy, design and technology work
+							together to create something greater than the sum of its parts
 						</FlankedText>
 					</FadeInSection>
 				</FadeSection>
-
-				<FadeInSection className="relative w-full px-4">
-					<FlankedText className="max-w-[462px] text-center font-light text-[23px] text-black normal-case leading-normal">
-						Here we explain the brand sculpting method.
-					</FlankedText>
-				</FadeInSection>
 			</div>
 
 			<AboutTeamCarousel />
@@ -70,15 +59,10 @@ export default function About() {
 				data-header-text="dark"
 				id="contact"
 			>
-				<h2 className="max-w-xs text-center font-medium text-2xl uppercase leading-tight">
-					Start your project with us
+				<h2 className="max-w-md text-center font-medium text-2xl uppercase leading-tight">
+					The First Step Isn't Design. <br /> It's a Conversation
 				</h2>
-				<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
-					<span className="inline-flex items-center gap-1">
-						<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-						Email Us
-					</span>
-				</a>
+				<ContactSectionPills />
 			</FadeSection>
 
 			<SiteFooter />

@@ -146,14 +146,21 @@ interface TeamCardShaderBackgroundProps {
 	memberKey: string;
 	/** Stagger first mount so four WebGPU inits don't race on page load. */
 	mountIndex?: number;
+	/** Team carousel section intersects the viewport — gates boot and pauses all cards off-screen. */
+	sectionVisible?: boolean;
+	/** Card is near carousel center — only the focused card runs motion + cursor follow. */
+	motionActive?: boolean;
 }
 
 export const TeamCardShaderBackground = memo(function TeamCardShaderBackground({
 	palette,
 	memberKey,
 	mountIndex = 0,
+	sectionVisible = true,
+	motionActive = true,
 }: TeamCardShaderBackgroundProps) {
 	const shellRef = useRef<HTMLDivElement>(null);
+	const shaderCanvasRef = useRef<HTMLDivElement>(null);
 	const configRef = useRef<ShaderLabConfig>(
 		createTeamCardShaderConfig(palette, `team-card-shader-${memberKey}`),
 	);
@@ -161,8 +168,12 @@ export const TeamCardShaderBackground = memo(function TeamCardShaderBackground({
 	const finePointerRef = useRef(false);
 	const cardHoverRef = useRef(false);
 	const cursorRef = useRef<[number, number]>([0, 0]);
+	// Track visibility in refs so rAF can read without re-subscribing every scroll frame.
+	const sectionVisibleRef = useRef(sectionVisible);
+	const motionActiveRef = useRef(motionActive);
 	// Mount once per card — never unmount when carousel focus changes.
 	const [shaderReady, setShaderReady] = useState(false);
+	const shaderBootedRef = useRef(false);
 	const smoothedRef = useRef({
 		p1x: BASE_POINT1[0],
 		p1y: BASE_POINT1[1],
@@ -188,16 +199,55 @@ export const TeamCardShaderBackground = memo(function TeamCardShaderBackground({
 		return () => media.removeEventListener("change", sync);
 	}, []);
 
-	// One-time staggered boot — stays mounted after ready (no teardown on scroll).
+	sectionVisibleRef.current = sectionVisible;
+	motionActiveRef.current = motionActive;
+
+	// Desktop-only, deferred boot when the carousel enters view — stays mounted after ready.
 	useEffect(() => {
+		if (!sectionVisible || shaderBootedRef.current || prefersReducedMotion) {
+			return;
+		}
+
+		const media = window.matchMedia("(hover: hover) and (pointer: fine)");
+		if (!media.matches) {
+			return;
+		}
+
 		const bootTimer = window.setTimeout(() => {
+			shaderBootedRef.current = true;
 			setShaderReady(true);
 		}, mountIndex * 160);
 
 		return () => {
 			window.clearTimeout(bootTimer);
 		};
-	}, [mountIndex]);
+	}, [sectionVisible, mountIndex, prefersReducedMotion]);
+
+	// Pause GPU work off-screen / on side cards without tearing down WebGPU (re-init freezes).
+	useEffect(() => {
+		if (!shaderReady) {
+			return;
+		}
+
+		const params = getGradientParams(configRef.current);
+		if (!params) {
+			return;
+		}
+
+		const gpuActive = sectionVisible && motionActive;
+		params.animate = gpuActive;
+		params.motionAmount = gpuActive ? BASE_MOTION : 0;
+
+		if (shaderCanvasRef.current) {
+			shaderCanvasRef.current.style.visibility = sectionVisible
+				? "visible"
+				: "hidden";
+		}
+
+		if (!sectionVisible) {
+			cardHoverRef.current = false;
+		}
+	}, [sectionVisible, motionActive, shaderReady]);
 
 	// Stable handler — ShaderLabComposition re-inits if this reference changes.
 	const handleRuntimeError = useCallback((message: string | null) => {
@@ -252,6 +302,11 @@ export const TeamCardShaderBackground = memo(function TeamCardShaderBackground({
 
 		let raf = 0;
 		const tick = () => {
+			if (!sectionVisibleRef.current || !motionActiveRef.current) {
+				raf = requestAnimationFrame(tick);
+				return;
+			}
+
 			const params = getGradientParams(configRef.current);
 			const smoothed = smoothedRef.current;
 			const cursor = cursorRef.current;
@@ -342,7 +397,11 @@ export const TeamCardShaderBackground = memo(function TeamCardShaderBackground({
 					backgroundImage: `linear-gradient(to bottom, ${palette.fallbackFrom}, ${palette.fallbackTo})`,
 				}}
 			/>
-			<div className="absolute inset-0 size-full [&_canvas]:size-full [&_canvas]:object-cover">
+			<div
+				ref={shaderCanvasRef}
+				className="absolute inset-0 size-full [&_canvas]:size-full [&_canvas]:object-cover"
+			>
+				{/* WebGPU stays mounted after first boot — unmounting forces a costly re-init on scroll back. */}
 				{shaderReady ? (
 					<ShaderLabComposition
 						config={configRef.current}

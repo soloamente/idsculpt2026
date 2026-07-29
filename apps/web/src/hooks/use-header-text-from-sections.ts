@@ -79,7 +79,8 @@ export function useHeaderTextFromSections(): HeaderTextMode {
 		const tick = () => {
 			cancelAnimationFrame(raf);
 			raf = requestAnimationFrame(() => {
-				setMode(resolveHeaderTextMode());
+				const next = resolveHeaderTextMode();
+				setMode((prev) => (prev === next ? prev : next));
 			});
 		};
 

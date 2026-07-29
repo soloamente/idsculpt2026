@@ -59,17 +59,17 @@ type BentoCard =
 const bentoRowOne: BentoCard[] = [
 	{
 		variant: "image-hero",
-		titleLines: ["Research-based", "process"],
+		titleLines: ["Strategic", "Foundation"],
 		description:
-			"Visually stunning, interactive website made to assert your digital dominance and captivate.",
+			"We study the brand, audience and competitive landscape before shaping any visual decision.",
 		image: "/images/sec3.png",
 		alt: "Ophelia sculpture study for research-based process",
 	},
 	{
 		variant: "solid",
-		title: "Knotless design",
+		title: "Purposeful Identity",
 		description:
-			"Visually stunning, interactive website made to assert your digital dominance and captivate.",
+			"Every visual element is crafted to communicate value, build trust and make the brand instantly recognizable.",
 		surfaceClassName: "bg-[#bdbab4]",
 		titleClassName: "text-[#353535]",
 		bodyClassName: "text-[#1d1d1d]",
@@ -80,9 +80,9 @@ const bentoRowOne: BentoCard[] = [
 const bentoRowTwo: BentoCard[] = [
 	{
 		variant: "overlay",
-		title: "custom design tools",
+		title: "Digital Experiences",
 		description:
-			"To the projects we curate, we also provide custom tools to ensure a continuity into the design system.",
+			"Websites, interfaces and digital experiences designed to feel intuitive, refined and aligned with the brand.",
 		surfaceClassName: "bg-[#c2c0bb]",
 		overlayImage: "/images/custom.png",
 		overlayAlt: "Sculptural forms for custom design tools",
@@ -92,9 +92,9 @@ const bentoRowTwo: BentoCard[] = [
 	},
 	{
 		variant: "solid",
-		title: "visual design",
+		title: "Refined Execution",
 		description:
-			"Visually stunning, interactive website made to assert your digital dominance and captivate.",
+			"From motion graphics to 3D assets, every element is refined to elevate the final result.",
 		surfaceClassName: "bg-[#303030]",
 		titleClassName: "text-white",
 		bodyClassName: "text-white",
@@ -102,9 +102,9 @@ const bentoRowTwo: BentoCard[] = [
 	},
 	{
 		variant: "bordered",
-		title: "avant-gardistic approach",
+		title: "Experience",
 		description:
-			"Visually stunning, interactive website made to assert your digital dominance and captivate.",
+			"From websites to motion and packaging, every detail reinforces the same brand story.",
 		titleClassName: "text-[#353535]",
 		bodyClassName: "text-[#1d1d1d] bg-[#BDBAB4]",
 	},
@@ -264,7 +264,7 @@ export function DesignTasteBentoSection() {
 			<div className="flex w-full items-center justify-between">
 				<span aria-hidden className={bentoHeaderSquareClassnames} />
 				<h2 className="max-w-[426px] text-center font-bold text-[clamp(1.75rem,4vw,2.49rem)] uppercase leading-normal">
-					where design meets artistic vision
+					FROM STRATEGY TO EXPERIENCE
 				</h2>
 				<span aria-hidden className={bentoHeaderSquareClassnames} />
 			</div>

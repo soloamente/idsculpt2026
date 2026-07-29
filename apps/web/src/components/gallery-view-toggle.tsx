@@ -81,22 +81,3 @@ export function GalleryViewToggle({
 		</div>
 	);
 }
-
-/** Short intro line shown under the filter pill for each view mode. */
-export function getGalleryViewIntro(
-	mode: GalleryViewMode,
-	hasCaseStudies: boolean,
-): string {
-	switch (mode) {
-		case "all-work":
-			return "Every identity, interface, and mark we've shaped — browse the full portfolio.";
-		case "case-studies":
-			return hasCaseStudies
-				? "Selected projects with process, systems, and deliverables — the stories behind the work."
-				: "Case studies are coming soon — deep-dive project stories will live here.";
-		default: {
-			const _exhaustive: never = mode;
-			return _exhaustive;
-		}
-	}
-}

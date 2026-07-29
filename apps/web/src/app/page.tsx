@@ -1,14 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ContactSectionPills } from "@/components/contact-section-pills";
 import { DesignApproachSection } from "@/components/design-approach-section";
 import { DesignTasteBentoSection } from "@/components/design-taste-bento-section";
 import { FadeFooter, FadeSection } from "@/components/fade-section";
 import { FooterDiaGradient } from "@/components/footer-dia-gradient";
+import { HeroShaderBackgroundLazy } from "@/components/hero-shader-background-lazy";
 import { siteFooterShellClassnames } from "@/components/site-footer";
-import { HeroShaderBackground } from "@/components/hero-shader-background";
-import {
-	CONTACT_EMAIL,
-} from "@/lib/contact";
 
 export default function Home() {
 	const works = [
@@ -29,21 +27,15 @@ export default function Home() {
 	const socialClassnames =
 		"hover:scale-98 hover:opacity-50 transition-all duration-200 ease-in-out will-change-transform";
 	/** Work preview cards — soft transform easing (same curve as DiaGradient rise). */
-	const workPreviewEase =
-		"duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
+	const workPreviewEase = "duration-[900ms] ease-[cubic-bezier(0.16,1,0.3,1)]";
 	const workPreviewClassnames = "group flex w-full flex-col gap-3 select-none";
-	const workPreviewImageClassnames =
-		`relative aspect-square w-full overflow-hidden rounded-2xl transition-transform ${workPreviewEase} will-change-transform group-hover:scale-[0.98]`;
-	const workPreviewCaptionClassnames =
-		`text-center uppercase transition-opacity ${workPreviewEase} group-hover:opacity-70`;
-	/** Stessa pill del CTA Discover / header Email us, adattata a testo nero su sfondo chiaro. */
-	const contactPillClassnames =
-		"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
+	const workPreviewImageClassnames = `relative aspect-square w-full overflow-hidden rounded-2xl transition-transform ${workPreviewEase} group-hover:scale-[0.98]`;
+	const workPreviewCaptionClassnames = `text-center uppercase transition-opacity ${workPreviewEase} group-hover:opacity-70`;
 	// Frammenti hero: l'effetto blur graduale (sopra → sotto) vale solo su `heroBrand` (i glifi sfocano davvero via `filter: blur` sullo strato mascherato).
-	const heroHeadlineBefore = "Welcome to ";
-	const heroBrand = "Identity/Sculpt";
-	const heroHeadlineAfter =
-		", a lively brand design studio in Italy. We focus on creating unique visual identities, driven by our passion for design and commitment to excellence.";
+	const heroTagline = "Brands aren't remembered by chance. They're sculpted.";
+	const heroBrand = "Identity Sculpt";
+	const heroSubheadAfter =
+		" is an Italian Brand Design Studio creating strategic identities, websites and digital experiences for ambitious brands.";
 	return (
 		<main className="relative min-h-screen overflow-x-hidden">
 			{/* data-header-text drives fixed nav color when this band is under the header sample line. */}
@@ -52,12 +44,12 @@ export default function Home() {
 				data-header-text="light"
 				id="hero"
 			>
-				<HeroShaderBackground />
+				<HeroShaderBackgroundLazy />
 				{/* Grana globale: vedi `layout.tsx`. */}
-				<h1 className="relative z-10 max-w-3xl text-center font-medium text-2xl leading-tight">
+				<h1 className="relative z-10 flex max-w-3xl flex-col gap-6 text-center font-medium text-2xl leading-tight">
+					<span className="block text-pretty">{heroTagline}</span>
 					{/* `inline-block` dà al solo brand un box per allineare strato nitido + strato con blur sui glifi. */}
 					<span className="block text-pretty">
-						{heroHeadlineBefore}
 						{/* z-index: lo strato sfocato deve stare sopra quello netto, altrimenti non vedi il blur. */}
 						<span className="relative inline-block align-baseline text-current">
 							<span className="relative z-1">{heroBrand}</span>
@@ -69,7 +61,7 @@ export default function Home() {
 								{heroBrand}
 							</span>
 						</span>
-						{heroHeadlineAfter}
+						{heroSubheadAfter}
 					</span>
 				</h1>
 				{/* Stessa identità del CTA header “Email us”: pill vetrosa + quadrato + label; scroll alla sezione work. */}
@@ -89,13 +81,14 @@ export default function Home() {
 				data-header-text="dark"
 				id="work"
 			>
-				<div className="flex max-w-md flex-col items-center justify-center gap-8">
+				<div className="flex max-w-lg flex-col items-center justify-center gap-8">
 					<h2 className="text-center font-bold text-3xl uppercase leading-tight">
-						A glimpse of our work
+						Sculpted identities
 					</h2>
 					<p className="text-center text-base">
-						Visually stunning, interactive website made to assert your digital
-						dominance and captivate.
+						Explore a selection of brands, websites and digital experiences
+						crafted to build authority, elevate value and leave a lasting
+						impression.
 					</p>
 				</div>
 				<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
@@ -112,9 +105,8 @@ export default function Home() {
 									src={work.image}
 									alt={work.alt}
 									className="size-full object-cover"
-									height={5000}
-									loading="eager"
-									width={5000}
+									fill
+									sizes="(max-width: 768px) 100vw, 50vw"
 								/>
 							</div>
 							<div className={workPreviewCaptionClassnames}>
@@ -126,22 +118,16 @@ export default function Home() {
 				</div>
 			</FadeSection>
 			<DesignApproachSection />
-			<DesignTasteBentoSection />
 			<FooterDiaGradient />
 			<FadeSection
 				className="relative z-10 flex min-h-screen w-full flex-col items-center justify-center gap-8 text-pretty px-4 pt-40 pb-8 text-black"
 				data-header-text="dark"
 				id="contact"
 			>
-				<h2 className="max-w-xs text-center font-medium text-2xl uppercase leading-tight">
-					Start your project with us
+				<h2 className="max-w-md text-center font-medium text-2xl uppercase leading-tight">
+					The First Step Isn't Design. <br /> It's a Conversation
 				</h2>
-				<a className={contactPillClassnames} href={`mailto:${CONTACT_EMAIL}`}>
-					<span className="inline-flex items-center gap-1">
-						<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-						Email Us
-					</span>
-				</a>
+				<ContactSectionPills />
 			</FadeSection>
 
 			<FadeFooter
@@ -179,12 +165,14 @@ export default function Home() {
 						</Link>
 					</div>
 				</div>
-				<div className="w-full w-full">
+				<div className="w-full">
 					<Image
 						src="/images/logo.svg"
 						alt="Identity Sculpt"
-						width={5000}
-						height={5000}
+						width={1200}
+						height={200}
+						sizes="100vw"
+						className="h-auto w-full"
 					/>
 				</div>
 			</FadeFooter>

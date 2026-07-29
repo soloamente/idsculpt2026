@@ -2,7 +2,7 @@
 export const CONTACT_EMAIL = "work@identitysculpt.com";
 
 /** Human-readable phone line (Italian format). */
-export const CONTACT_PHONE_DISPLAY = "+39 328 733 2424";
+export const CONTACT_PHONE_DISPLAY = "+39 373 774 2584";
 
 /** E.164-style value for `tel:` links (spaces omitted). */
-export const CONTACT_PHONE_TEL = "+393287332424";
+export const CONTACT_PHONE_TEL = "+393737742584";

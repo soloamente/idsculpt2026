@@ -10,9 +10,12 @@ import {
 } from "@/components/gallery-project-card";
 import {
 	GalleryViewToggle,
-	getGalleryViewIntro,
 	type GalleryViewMode,
 } from "@/components/gallery-view-toggle";
+
+/** Static intro shown under the gallery title. */
+const galleryDescription =
+	"Creating unique brand experiences through branding, web design, motion graphics, and 3D design to shape powerful digital identities.";
 
 /** Accoppia i progetti filtrati per righe a 2 colonne. */
 function chunkGalleryRows(
@@ -59,7 +62,6 @@ export function GalleryPageContent({ projects }: GalleryPageContentProps) {
 		[projects, viewMode],
 	);
 	const galleryRows = chunkGalleryRows(filteredProjects, 2);
-	const introCopy = getGalleryViewIntro(viewMode, hasCaseStudies);
 
 	const contentTransition = prefersReducedMotion
 		? { duration: 0 }
@@ -74,36 +76,19 @@ export function GalleryPageContent({ projects }: GalleryPageContentProps) {
 			>
 				<div className="flex max-w-[829px] flex-col items-center gap-[15px] text-center">
 					<p className="text-base text-black/50">portfolio</p>
-					<h1 className="font-medium text-[#202020] text-[clamp(1.5rem,4vw,2rem)] leading-normal">
-						<span className="block">Our offerings,</span>
-						<span className="block">a canvas of creativity.</span>
+					<h1 className="font-medium text-[#202020] text-[clamp(1.5rem,4vw,2rem)] leading-none">
+						<span className="">A Gallery of Sculpted Solutions</span>
 					</h1>
+					<p className="max-w-lg text-pretty font-light text-[clamp(1rem,1.8vw,1.44rem)] leading-tight">
+						{galleryDescription}
+					</p>
 				</div>
 
-				<div className="flex w-full max-w-4xl flex-col items-center gap-6">
-					<GalleryViewToggle
-						caseStudiesAvailable={hasCaseStudies}
-						value={viewMode}
-						onChange={setViewMode}
-					/>
-
-					<div className="flex w-full items-center justify-center gap-9">
-						<span aria-hidden className="size-2 shrink-0 bg-[#202020]" />
-						<AnimatePresence initial={false} mode="wait">
-							<motion.p
-								key={viewMode}
-								animate={{ opacity: 1, y: 0 }}
-								className="max-w-[462px] text-center font-light text-[clamp(1rem,1.8vw,1.44rem)] normal-case leading-normal"
-								exit={{ opacity: 0, y: -6 }}
-								initial={{ opacity: 0, y: 6 }}
-								transition={contentTransition}
-							>
-								{introCopy}
-							</motion.p>
-						</AnimatePresence>
-						<span aria-hidden className="size-2 shrink-0 bg-[#202020]" />
-					</div>
-				</div>
+				<GalleryViewToggle
+					caseStudiesAvailable={hasCaseStudies}
+					value={viewMode}
+					onChange={setViewMode}
+				/>
 			</FadeSection>
 
 			<section
