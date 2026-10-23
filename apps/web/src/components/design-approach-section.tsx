@@ -41,7 +41,7 @@ export function DesignApproachSection() {
 		>
 			<div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8">
 				<h2 className="text-center font-bold text-3xl uppercase leading-tight">
-					THE SCULPTING METHOD
+					Our approach is <br /> based on three <br /> pillars
 				</h2>
 
 				{/* Intro centrata con quadrati ai lati del testo + accenti agli estremi della riga. */}
@@ -56,10 +56,9 @@ export function DesignApproachSection() {
 					/>
 					<div className="flex max-w-lg items-center justify-center gap-3">
 						<span aria-hidden className={approachSquareClassnames} />
-						<p className="text-center text-base">
-							Every identity we create is shaped through a clear method built on
-							three pillars: strategic thinking, purposeful design and
-							consistent execution.
+						<p className="text-center text-lg">
+							Visually stunning, interactive website made to assert your digital
+							dominance and captivate.
 						</p>
 						<span aria-hidden className={approachSquareClassnames} />
 					</div>

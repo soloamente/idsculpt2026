@@ -169,6 +169,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "@basementstudio/shader-lab@1.4.0": "patches/@basementstudio%2Fshader-lab@1.4.0.patch",
+  },
   "catalog": {
     "@trpc/client": "^11.13.4",
     "@trpc/server": "^11.13.4",

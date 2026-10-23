@@ -3,6 +3,7 @@ import {
 	Bricolage_Grotesque,
 	Fraunces,
 	Instrument_Serif,
+	Playfair_Display,
 	Syne,
 } from "next/font/google";
 
@@ -37,12 +38,20 @@ const stickerSyne = Syne({
 	weight: ["700"],
 });
 
+/* Team quotes — Figma Playfair Display SemiBold, scoped to About. */
+const teamQuote = Playfair_Display({
+	variable: "--font-team-quote",
+	subsets: ["latin"],
+	weight: "600",
+});
+
 const stickerFontVars = [
 	stickerArchivo.variable,
 	stickerBricolage.variable,
 	stickerFraunces.variable,
 	stickerInstrument.variable,
 	stickerSyne.variable,
+	teamQuote.variable,
 ].join(" ");
 
 export default function AboutLayout({

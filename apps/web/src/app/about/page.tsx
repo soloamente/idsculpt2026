@@ -23,7 +23,8 @@ function FlankedText({
 
 export default function About() {
 	return (
-		<main className="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+		<main className="relative flex min-h-screen w-full flex-col overflow-x-clip">
+			{/* overflow-x-clip: horizontal bleed guard without forcing overflow-y:auto (clips peel FX). */}
 			{/* Full-page sticker field — sits behind all sections, spans entire scroll height. */}
 			{/* Above page sections (z-1/z-10) so hit targets receive drags; host stays pointer-events-none. */}
 			<WordStickersPlayground className="pointer-events-none absolute inset-0 z-20" />
@@ -34,10 +35,10 @@ export default function About() {
 					data-header-text="dark"
 					id="about-intro"
 				>
-					<FadeInSection className="flex max-w-[829px] flex-col items-center gap-4 text-center">
+					<FadeInSection className="flex max-w-[829px] flex-col items-center gap-2 text-center">
 						<p className="text-base text-black/50">about</p>
 						<h1 className="font-medium text-[32px] text-[#202020] leading-normal">
-							ONE TEAM. ONE VISION.
+							write some lines about teamwork
 						</h1>
 					</FadeInSection>
 

@@ -2,7 +2,9 @@
 
 import { cn } from "@idsculpt/ui/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import type { Route } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { FadeInSection } from "@/components/fade-section";
@@ -15,6 +17,10 @@ export interface GalleryProject {
 	type: string;
 	/** When true, project appears under the Case studies filter. */
 	isCaseStudy?: boolean;
+	/** Route slug for `/gallery/[slug]` when a case study is published. */
+	slug?: string;
+	/** Edge-to-edge crop for case-study footer preview cards (gallery thumbs have baked-in margins). */
+	footerPreviewImage?: string;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -162,14 +168,15 @@ export function GalleryProjectCard({ project }: { project: GalleryProject }) {
 		? { duration: 0 }
 		: INDICATOR.spring;
 
-	return (
-		<FadeInSection className="h-full">
-			{/*
-			 * Square card shell: image flexes in the upper area; dots + title stay
-			 * inside without stretching the outer aspect ratio.
-			 */}
-			<article className="flex aspect-square w-full min-w-0 max-w-full flex-col items-center gap-3 overflow-hidden rounded-[10px] bg-[#f8f7f7] px-[30px] py-[30px]">
-				<div className="relative min-h-0 w-full flex-1 overflow-hidden">
+	const caseStudyHref =
+		project.isCaseStudy && project.slug ? `/gallery/${project.slug}` : null;
+
+	const articleClassnames =
+		"flex aspect-square w-full min-w-0 max-w-full flex-col items-center gap-3 overflow-hidden rounded-[10px] bg-[#f8f7f7] px-[30px] py-[30px]";
+
+	const cardInner = (
+		<>
+			<div className="relative min-h-0 w-full flex-1 overflow-hidden">
 					<AnimatePresence custom={slideDirection} initial={false} mode="sync">
 						<motion.div
 							key={activeImageIndex}
@@ -217,7 +224,12 @@ export function GalleryProjectCard({ project }: { project: GalleryProject }) {
 										"relative size-2 shrink-0 [-webkit-tap-highlight-color:transparent]",
 										!isActive && "bg-[#202020]/30",
 									)}
-									onClick={() => handleImageSelect(index)}
+									onClick={(event) => {
+										// Keep preview dots usable when the card is also a case-study link.
+										event.preventDefault();
+										event.stopPropagation();
+										handleImageSelect(index);
+									}}
 								>
 									{/* Shared chip slides between squares so direction matches the preview. */}
 									{isActive ? (
@@ -233,12 +245,29 @@ export function GalleryProjectCard({ project }: { project: GalleryProject }) {
 						})}
 					</div>
 
-					<div className="text-center uppercase">
-						<h3 className="font-medium opacity-50">{project.title}</h3>
-						<p className="text-xs opacity-25">{project.type}</p>
-					</div>
+				<div className="text-center uppercase">
+					<h3 className="font-medium opacity-50">{project.title}</h3>
+					<p className="text-xs opacity-25">{project.type}</p>
 				</div>
-			</article>
+			</div>
+		</>
+	);
+
+	return (
+		<FadeInSection className="h-full">
+			{caseStudyHref ? (
+				<Link
+					className={cn(
+						articleClassnames,
+						"transition-transform duration-150 ease-out hover:scale-[1.01] motion-reduce:transition-none motion-reduce:hover:scale-100",
+					)}
+					href={caseStudyHref as Route}
+				>
+					{cardInner}
+				</Link>
+			) : (
+				<article className={articleClassnames}>{cardInner}</article>
+			)}
 		</FadeInSection>
 	);
 }

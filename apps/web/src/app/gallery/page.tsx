@@ -6,63 +6,7 @@ import { FadeFooter, FadeSection } from "@/components/fade-section";
 import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { siteFooterShellClassnames } from "@/components/site-footer";
 import { GalleryPageContent } from "@/components/gallery-page-content";
-import type { GalleryProject } from "@/components/gallery-project-card";
-
-/** Portfolio projects — set `isCaseStudy: true` when a deep-dive is ready to publish. */
-const galleryProjects: GalleryProject[] = [
-	{
-		images: [
-			"/images/tenryuu.png",
-			"/images/Frame 122.png",
-			"/images/tenryuu-posters.png",
-		],
-		alt: "Tenryuu",
-		title: "Tenryuu",
-		type: "Identity design",
-	},
-	{
-		images: ["/images/chili.png", "/images/chili_2.png"],
-		alt: "Chili Riders",
-		title: "Chili riders",
-		type: "Identity design",
-	},
-	{
-		images: ["/images/oasis-web.png"],
-		alt: "Oasis Team",
-		title: "Oasis-team",
-		type: "Brand refresh",
-	},
-	{
-		images: ["/images/meyou.png"],
-		alt: "Wave Catchers",
-		title: "Wave catchers",
-		type: "Logo redesign",
-	},
-	{
-		images: ["/images/mentally.png"],
-		alt: "Mentally",
-		title: "Mentally",
-		type: "Interface design",
-	},
-	{
-		images: ["/images/navia.png"],
-		alt: "Navia",
-		title: "Navia",
-		type: "Interface design",
-	},
-	{
-		images: ["/images/lonewolf.png"],
-		alt: "Lonewolf",
-		title: "lonewolf",
-		type: "Logo design",
-	},
-	{
-		images: ["/images/sydus.png"],
-		alt: "Sydus",
-		title: "sydus",
-		type: "Logo design",
-	},
-];
+import { galleryProjects } from "@/data/gallery-projects";
 
 export default function Gallery() {
 	const socialClassnames =

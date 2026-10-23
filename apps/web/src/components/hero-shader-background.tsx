@@ -147,6 +147,8 @@ export function HeroShaderBackground() {
 	const cursorRef = useRef<[number, number]>([0, 0]);
 	/** Pause cursor follow when the hero band leaves the viewport (shader stays mounted). */
 	const heroVisibleRef = useRef(true);
+	/** Drives the patched `paused` prop so the WebGPU render loop stops off-screen (renderer stays alive). */
+	const [heroVisible, setHeroVisible] = useState(true);
 	const smoothedRef = useRef({
 		p1x: BASE_POINT1[0],
 		p1y: BASE_POINT1[1],
@@ -187,24 +189,13 @@ export function HeroShaderBackground() {
 			return;
 		}
 
-		const setShaderMotion = (active: boolean) => {
-			const params = getGradientParams();
-			if (!params) {
-				return;
-			}
-			// Reduce GPU work off-screen without tearing down the WebGPU context.
-			params.animate = active;
-			params.motionAmount = active ? smoothedRef.current.motion : 0;
-		};
-
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				const visible = entry?.isIntersecting ?? false;
 				heroVisibleRef.current = visible;
-				if (shaderShellRef.current) {
-					shaderShellRef.current.style.visibility = visible ? "visible" : "hidden";
-				}
-				setShaderMotion(visible);
+				// The patched ShaderLabComposition stops its rAF loop while `paused` (no WebGPU re-init on resume),
+				// so the old `animate`/`visibility` toggling is no longer needed.
+				setHeroVisible(visible);
 				if (!visible) {
 					heroHoverRef.current = false;
 					discoverHoverRef.current = false;
@@ -395,9 +386,12 @@ export function HeroShaderBackground() {
 					ref={shaderShellRef}
 					className="absolute inset-0 size-full [&_canvas]:size-full [&_canvas]:object-cover"
 				>
+					{/* maxPixelRatio 1: the gradient is smooth, so rendering at CSS resolution (1/4 the pixels on retina) is visually identical. */}
 					<ShaderLabComposition
 						config={heroShaderConfig}
+						maxPixelRatio={1}
 						onRuntimeError={handleRuntimeError}
+						paused={!heroVisible}
 					/>
 				</div>
 			)}

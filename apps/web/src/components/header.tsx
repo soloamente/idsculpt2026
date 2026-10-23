@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { isCaseStudyDetailPath } from "@/data/gallery-projects";
 import { useHeaderTextFromSections } from "@/hooks/use-header-text-from-sections";
 import { CONTACT_EMAIL } from "@/lib/contact";
 
@@ -114,6 +115,11 @@ export default function Header() {
 			? "border border-black/10 bg-black/40 backdrop-blur-sm"
 			: "border border-black/10 bg-white/50 backdrop-blur-sm",
 	);
+
+	// Case-study deep dives use Figma chrome only (Return to projects + section pill).
+	if (isCaseStudyDetailPath(pathname)) {
+		return null;
+	}
 
 	return (
 		<header

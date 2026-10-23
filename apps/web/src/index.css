@@ -52,7 +52,9 @@ button {
 	14% {
 		opacity: 1;
 		filter: brightness(1.7);
-		text-shadow: 0 0 4px currentColor, 0 0 12px currentColor;
+		text-shadow:
+			0 0 4px currentColor,
+			0 0 12px currentColor;
 	}
 	18% {
 		opacity: 0.25;
@@ -62,7 +64,9 @@ button {
 	23% {
 		opacity: 0.9;
 		filter: brightness(1.85);
-		text-shadow: 0 0 5px currentColor, 0 0 18px currentColor;
+		text-shadow:
+			0 0 5px currentColor,
+			0 0 18px currentColor;
 	}
 	28% {
 		opacity: 0.45;
@@ -72,7 +76,9 @@ button {
 	34% {
 		opacity: 1;
 		filter: brightness(1.55);
-		text-shadow: 0 0 4px currentColor, 0 0 14px currentColor;
+		text-shadow:
+			0 0 4px currentColor,
+			0 0 14px currentColor;
 	}
 	/* Meno sfrigolio, comincia a tenere */
 	45% {
@@ -83,7 +89,9 @@ button {
 	58% {
 		opacity: 1;
 		filter: brightness(1.25);
-		text-shadow: 0 0 2px currentColor, 0 0 8px currentColor;
+		text-shadow:
+			0 0 2px currentColor,
+			0 0 8px currentColor;
 	}
 	100% {
 		opacity: 1;
@@ -100,5 +108,471 @@ button {
 @media (prefers-reduced-motion: reduce) {
 	.header-nav-neon-blink {
 		animation: none;
+	}
+}
+
+/* transitions.dev motion tokens (subset) — improved identities carousel */
+:root {
+	--duration-fast: 250ms;
+	--duration-quick: 150ms;
+	--duration-very-slow: 500ms;
+	--ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in-out: ease-in-out;
+	--ease-out: ease-out;
+	--ease-linear: linear;
+	/* transitions.dev tooltip — team name portrait appear / leave */
+	--tt-in-dur: 150ms;
+	--tt-out-dur: 50ms;
+	--tt-scale: 0.98;
+	--tt-delay: 80ms;
+	--tt-in-ease: var(--ease-out);
+	--tt-out-ease: var(--ease-out);
+	--tt-move-dur: 160ms;
+	--tt-move-ease: var(--ease-smooth-out);
+	--resize-dur: 850ms;
+	--resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--stagger-dur: 500ms;
+	--stagger-distance: 12px;
+	--stagger-stagger: 40ms;
+	--stagger-blur: 3px;
+	--stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--improved-slide-duration: 8000ms;
+	/* transitions.dev — text swap soft (section nav labels) */
+	--text-soft-dur: 200ms;
+	--text-soft-blur: 2px;
+	--text-soft-ease: ease-in-out;
+	--text-soft-resize-dur: 240ms;
+	--text-soft-resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--text-soft-scale: 0.96;
+	--blur-small: 2px;
+	/* Case study section nav — accordion + card resize (Figma 449) */
+	--section-nav-card-open-width: 324px;
+	--acc-expand: var(--duration-fast);
+	--acc-collapse: var(--duration-fast);
+	--acc-chevron: var(--duration-fast);
+	--acc-ease: var(--ease-smooth-out);
+}
+
+/* transitions.dev card resize — pill width ↔ open card width */
+.t-case-study-section-nav-card.t-resize {
+	transition:
+		width var(--duration-fast) var(--resize-ease),
+		height var(--duration-fast) var(--resize-ease),
+		border-radius var(--duration-fast) var(--resize-ease);
+	will-change: width, height;
+}
+
+/* transitions.dev accordion — panel body height (section nav) */
+.t-case-study-section-nav-card.t-acc .t-acc-panel {
+	display: grid;
+	grid-template-rows: 0fr;
+	min-width: 0;
+	/* 0fr must be allowed to reach 0; otherwise panel padding leaves a strip. */
+	min-height: 0;
+	transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
+}
+/* Closed pill: title stays one line. Width is a px tween (max-content can't ease). */
+.t-case-study-section-nav-card[data-open="false"].t-resize {
+	transition:
+		width var(--text-soft-resize-dur) var(--text-soft-resize-ease),
+		height var(--duration-fast) var(--resize-ease),
+		border-radius var(--duration-fast) var(--resize-ease);
+}
+.t-case-study-section-nav-card[data-open="false"] [data-section-nav-header] {
+	flex-wrap: nowrap;
+}
+.t-case-study-section-nav-card[data-open="false"] .t-case-study-nav-label {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+/* Dot collapses with the same resize as the title so the pill doesn't pop. */
+.t-case-study-section-nav-dot {
+	display: block;
+	width: 8px;
+	height: 8px;
+	margin-left: 16px;
+	opacity: 1;
+	overflow: hidden;
+	transition:
+		width var(--text-soft-resize-dur) var(--text-soft-resize-ease),
+		margin-left var(--text-soft-resize-dur) var(--text-soft-resize-ease),
+		opacity var(--text-soft-dur) var(--text-soft-ease);
+}
+.t-case-study-section-nav-card[data-has-description="false"] .t-case-study-section-nav-dot {
+	width: 0;
+	margin-left: 0;
+	opacity: 0;
+}
+
+/* Closed panel must not set the card's intrinsic width (description is wider than the pill). */
+.t-case-study-section-nav-card.t-acc:not([data-open="true"]) .t-acc-panel-inner {
+	width: 0;
+	min-width: 0;
+}
+.t-case-study-section-nav-card.t-acc[data-open="true"] .t-acc-panel {
+	grid-template-rows: 1fr;
+	transition: grid-template-rows var(--acc-expand) var(--acc-ease);
+}
+.t-case-study-section-nav-card.t-acc .t-acc-panel-inner {
+	overflow: hidden;
+	opacity: 0;
+	filter: blur(var(--blur-small));
+	transition:
+		opacity var(--acc-collapse) var(--acc-ease),
+		filter var(--acc-collapse) var(--acc-ease);
+}
+.t-case-study-section-nav-card.t-acc[data-open="true"] .t-acc-panel-inner {
+	opacity: 1;
+	filter: blur(0);
+	transition:
+		opacity var(--acc-expand) var(--acc-ease),
+		filter var(--acc-expand) var(--acc-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-case-study-section-nav-card.t-resize,
+	.t-case-study-section-nav-card.t-acc .t-acc-panel,
+	.t-case-study-section-nav-card.t-acc .t-acc-panel-inner,
+	.t-case-study-section-nav-dot {
+		transition: none !important;
+	}
+}
+
+/* transitions.dev text-swap-soft — cross-blur + width ease */
+.t-text-soft {
+	display: inline-grid;
+	justify-items: var(--text-soft-align, start);
+	transition: width var(--text-soft-resize-dur) var(--text-soft-resize-ease);
+}
+.t-text-soft > span {
+	grid-area: 1 / 1;
+	white-space: pre;
+	transition:
+		filter var(--text-soft-dur) var(--text-soft-ease),
+		opacity var(--text-soft-dur) var(--text-soft-ease),
+		transform var(--text-soft-dur) var(--text-soft-ease);
+}
+.t-text-soft-new {
+	opacity: 0;
+	filter: blur(var(--text-soft-blur));
+	transform: scale(var(--text-soft-scale, 0.96));
+}
+.t-text-soft.is-swapping .t-text-soft-old {
+	opacity: 0;
+	filter: blur(var(--text-soft-blur));
+	transform: scale(var(--text-soft-scale, 0.96));
+}
+.t-text-soft.is-swapping .t-text-soft-new {
+	opacity: 1;
+	filter: blur(0);
+	transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-text-soft,
+	.t-text-soft > span {
+		transition: none !important;
+	}
+}
+
+/* Card resize — column flex grow (transitions.dev card resize pattern) */
+.t-improved-column {
+	flex: 274 1 0%;
+	min-width: 0;
+	transition:
+		flex-grow var(--resize-dur) var(--resize-ease),
+		opacity var(--duration-quick) var(--ease-smooth-out);
+	will-change: flex-grow;
+}
+
+.t-improved-column[data-featured="true"] {
+	flex-grow: 824;
+}
+
+/* Texts reveal — caption under the expanded project */
+.t-improved-caption.t-stagger-line {
+	display: block;
+	opacity: 0;
+	transform: translateY(var(--stagger-distance));
+	filter: blur(var(--stagger-blur));
+	transition:
+		opacity var(--stagger-dur) var(--stagger-ease),
+		transform var(--stagger-dur) var(--stagger-ease),
+		filter var(--stagger-dur) var(--stagger-ease);
+}
+
+.t-improved-caption.t-stagger-line--2 {
+	transition-delay: var(--stagger-stagger);
+}
+
+.t-improved-caption-block.is-shown .t-improved-caption.t-stagger-line {
+	opacity: 1;
+	transform: translateY(0);
+	filter: blur(0);
+}
+
+.t-improved-caption-block.is-hiding .t-improved-caption.t-stagger-line {
+	opacity: 0;
+	transform: translateY(0);
+	filter: blur(0);
+	transition:
+		opacity 200ms ease,
+		transform 0s linear,
+		filter 0s linear;
+	transition-delay: 0s;
+}
+
+/* Pagination — square dot expands to wide track before the fill runs */
+.t-improved-dot-track {
+	display: inline-block;
+	height: 8px;
+	width: 8px;
+	overflow: hidden;
+	border-radius: 1px;
+	transition: width var(--duration-fast) var(--ease-smooth-out);
+	will-change: width;
+}
+
+.t-improved-dot-track[data-active="true"] {
+	width: 20px;
+}
+
+@keyframes improved-identities-progress-fill {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+.improved-identities-progress-fill {
+	transform: scaleX(0);
+	transform-origin: left center;
+	/* Let the square→track width transition finish, then fill for the full slide window. */
+	animation-delay: var(--duration-fast);
+	animation-duration: calc(
+		var(--improved-slide-duration) -
+		var(--duration-fast)
+	);
+	animation-name: improved-identities-progress-fill;
+	animation-timing-function: var(--ease-linear);
+	animation-fill-mode: forwards;
+	will-change: transform;
+}
+
+.improved-identities-progress-fill[data-paused="true"] {
+	animation-play-state: paused;
+}
+
+/* Case study section nav — Figma 449:137 hover (collapsed row opacity 65%). */
+@media (hover: hover) {
+	.t-case-study-section-nav-trigger:hover {
+		opacity: 0.65;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-case-study-section-nav-trigger:hover {
+		opacity: 1;
+	}
+}
+
+/* Case study media stack — same smooth card-resize feel as homepage improved identities (.t-improved-column). */
+:root {
+	--case-study-media-scale-hover: 1.02;
+	--case-study-media-scale-shrink: 0.985;
+	--case-study-media-dur: var(--resize-dur);
+	--case-study-media-ease: var(--resize-ease);
+}
+
+.t-case-study-media-group .t-case-study-media {
+	transform: scale(var(--scale-active, 1));
+	opacity: var(--opacity-active, 1);
+	transform-origin: center center;
+	/* Opacity uses the same dur/ease as scale — quick opacity felt out of sync with the resize tween. */
+	transition:
+		transform var(--case-study-media-dur) var(--case-study-media-ease),
+		opacity var(--case-study-media-dur) var(--case-study-media-ease);
+	will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-case-study-media-group .t-case-study-media {
+		transition: none !important;
+		transform: none !important;
+		opacity: 1 !important;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-improved-column {
+		transition: none !important;
+	}
+
+	.t-improved-caption.t-stagger-line {
+		transition: none !important;
+	}
+
+	.t-improved-dot-track {
+		transition: none !important;
+	}
+
+	.improved-identities-progress-fill {
+		animation: none;
+		transform: scaleX(1);
+	}
+}
+
+/* About team — focused profile is full size; neighbors scale down,
+   blur, and fade (Figma 526:103). Position change uses the smooth-out ease. */
+.t-team-stage {
+	position: relative;
+	height: 360px;
+	width: 100%;
+	overflow: hidden;
+}
+.t-team-profile {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	width: 406px;
+	transform-origin: top center;
+	transform: translateX(-50%) scale(0.84);
+	opacity: 1;
+	filter: none;
+	z-index: 3;
+	transition:
+		transform var(--duration-very-slow) var(--ease-smooth-out),
+		filter var(--duration-very-slow) var(--ease-smooth-out),
+		opacity var(--duration-very-slow) var(--ease-smooth-out);
+	will-change: transform;
+}
+.t-team-profile:not([data-distance="0"]) {
+	opacity: 0;
+	pointer-events: none;
+}
+.t-team-name {
+	cursor: pointer;
+	border: 0;
+	background: none;
+	padding: 0;
+	-webkit-tap-highlight-color: transparent;
+}
+.t-team-name:focus-visible {
+	border-radius: 2px;
+	box-shadow: 0 0 0 2px #202020;
+}
+
+@media (min-width: 768px) {
+	.t-team-stage {
+		height: 440px;
+		overflow: visible;
+	}
+	.t-team-profile[data-distance="0"] {
+		transform: translateX(-50%) scale(1);
+		filter: none;
+		opacity: 1;
+		z-index: 3;
+		pointer-events: auto;
+	}
+	.t-team-profile[data-side="left"][data-distance="1"] {
+		transform: translateX(calc(-50% - 400px)) scale(0.778);
+		filter: blur(3.85px);
+		opacity: 0.44;
+		z-index: 2;
+		pointer-events: auto;
+		cursor: pointer;
+	}
+	.t-team-profile[data-side="right"][data-distance="1"] {
+		transform: translateX(calc(-50% + 400px)) scale(0.778);
+		filter: blur(3.85px);
+		opacity: 0.44;
+		z-index: 2;
+		pointer-events: auto;
+		cursor: pointer;
+	}
+	.t-team-profile[data-side="left"][data-distance="2"] {
+		transform: translateX(calc(-50% - 680px)) scale(0.65);
+		filter: blur(2.9px);
+		opacity: 0.4;
+		z-index: 1;
+		pointer-events: auto;
+		cursor: pointer;
+	}
+	.t-team-profile[data-side="right"][data-distance="2"] {
+		transform: translateX(calc(-50% + 680px)) scale(0.65);
+		filter: blur(2.9px);
+		opacity: 0.4;
+		z-index: 1;
+		pointer-events: auto;
+		cursor: pointer;
+	}
+	.t-team-profile[data-distance="3"] {
+		transform: translateX(calc(-50% + 920px)) scale(0.55);
+		filter: blur(3.2px);
+		opacity: 0.28;
+		z-index: 0;
+		pointer-events: auto;
+		cursor: pointer;
+	}
+	.t-team-profile[data-side="left"][data-distance="3"] {
+		transform: translateX(calc(-50% - 920px)) scale(0.55);
+	}
+}
+
+@media (min-width: 1280px) {
+	.t-team-profile[data-side="left"][data-distance="1"] {
+		transform: translateX(calc(-50% - 470px)) scale(0.778);
+	}
+	.t-team-profile[data-side="right"][data-distance="1"] {
+		transform: translateX(calc(-50% + 470px)) scale(0.778);
+	}
+	.t-team-profile[data-side="left"][data-distance="2"] {
+		transform: translateX(calc(-50% - 790px)) scale(0.65);
+	}
+	.t-team-profile[data-side="right"][data-distance="2"] {
+		transform: translateX(calc(-50% + 790px)) scale(0.65);
+	}
+	.t-team-profile[data-distance="3"] {
+		transform: translateX(calc(-50% + 1080px)) scale(0.55);
+	}
+	.t-team-profile[data-side="left"][data-distance="3"] {
+		transform: translateX(calc(-50% - 1080px)) scale(0.55);
+	}
+}
+
+/* Member-hover portrait. Appear/leave matches transitions.dev tooltip
+   (delayed fade + scale in, instant out). X/Y follow is a spring on the
+   wrapper so the photo tracks the pointer instead of hopping between names. */
+.t-team-cursor-photo {
+	position: relative;
+	display: block;
+	width: 210px;
+	height: 210px;
+	overflow: hidden;
+	border-radius: 16px;
+	opacity: 0;
+	scale: var(--tt-scale);
+	pointer-events: none;
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.06),
+		0 12px 40px rgba(0, 0, 0, 0.16);
+	transition:
+		opacity var(--tt-out-dur) var(--tt-out-ease),
+		scale var(--tt-out-dur) var(--tt-out-ease);
+}
+.t-team-cursor-photo[data-show="true"] {
+	opacity: 1;
+	scale: 1;
+	transition:
+		opacity var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay),
+		scale var(--tt-in-dur) var(--tt-in-ease) var(--tt-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.t-team-profile,
+	.t-team-cursor-photo {
+		transition: none !important;
 	}
 }

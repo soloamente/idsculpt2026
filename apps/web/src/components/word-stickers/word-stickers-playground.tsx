@@ -12,6 +12,15 @@ type WordStickersPlaygroundProps = {
 	className?: string;
 };
 
+/**
+ * WebGL viewport height — sticker-forge demo uses ~420px.
+ * Peel curl + projected shadow need a tall canvas; CSS scale shrinks to the layout footprint.
+ */
+const STICKER_CANVAS_HEIGHT = 380;
+
+/** Die-cut mesh occupies ~78% of canvas width inside sticker-forge's internal layout. */
+const FORGE_MESH_WIDTH_RATIO = 0.78;
+
 /** Shared peel/shadow tuning — matches sticker-forge demo defaults. */
 const FORGE_DEFAULTS = {
 	outlineWidth: 16,
@@ -26,10 +35,21 @@ const FORGE_DEFAULTS = {
 	soundVolume: 0.68,
 };
 
-/** Container size from word length — sticker-forge fills the box with die-cut text. */
+/** Target visual footprint on the page (word length drives width). */
 function stickerBoxSize(word: string) {
 	const width = Math.max(128, Math.min(320, word.length * 26 + 56));
 	return { width, height: 96 };
+}
+
+/** Large WebGL canvas + CSS scale so peel FX stay inside the canvas bounds. */
+function stickerLayout(word: string, canvasHeight: number) {
+	const content = stickerBoxSize(word);
+	const canvasWidth = Math.max(240, Math.round(content.width * (canvasHeight / content.height)));
+	// Scale down so the ~78%-wide mesh matches the intended content width on the page.
+	const visualScale = content.width / (canvasWidth * FORGE_MESH_WIDTH_RATIO);
+	const visualWidth = canvasWidth * visualScale;
+	const visualHeight = canvasHeight * visualScale;
+	return { content, canvasWidth, canvasHeight, visualScale, visualWidth, visualHeight };
 }
 
 /** Fewer WebGL instances on touch / narrow viewports to protect mobile GPU. */
@@ -90,17 +110,22 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 			H = host.clientHeight || 1;
 		};
 
+		/** Place a wrapper using normalized x/y — call before append so stickers never flash at (0,0). */
+		const positionWrapper = (wrapper: HTMLDivElement, viewportW: number, viewportH: number) => {
+			const x = Number(wrapper.dataset.x ?? "0.5");
+			const y = Number(wrapper.dataset.y ?? "0.5");
+			const rot = Number(wrapper.dataset.rot ?? "0");
+			const wrapW = Number(wrapper.dataset.wrapWidth ?? "256");
+			const wrapH = Number(wrapper.dataset.wrapHeight ?? "192");
+			wrapper.style.left = `${x * viewportW - wrapW / 2}px`;
+			wrapper.style.top = `${y * viewportH - wrapH / 2}px`;
+			wrapper.style.transform = `rotate(${rot}deg)`;
+		};
+
 		const layoutAll = () => {
 			measure();
 			for (const { wrapper } of mounted) {
-				const x = Number(wrapper.dataset.x ?? "0.5");
-				const y = Number(wrapper.dataset.y ?? "0.5");
-				const rot = Number(wrapper.dataset.rot ?? "0");
-				const width = Number(wrapper.dataset.width ?? "160");
-				const height = Number(wrapper.dataset.height ?? "96");
-				wrapper.style.left = `${x * W - width / 2}px`;
-				wrapper.style.top = `${y * H - height / 2}px`;
-				wrapper.style.transform = `rotate(${rot}deg)`;
+				positionWrapper(wrapper, W, H);
 			}
 		};
 
@@ -116,35 +141,55 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 
 			const quality = coarse || narrow ? "medium" : "high";
 			const soundEnabled = !reduced && !coarse;
+			const canvasHeight = coarse || narrow ? 280 : STICKER_CANVAS_HEIGHT;
 
 			for (let i = 0; i < defs.length; i++) {
 				if (cancelled) break;
 				const def = defs[i];
-				const { width, height } = stickerBoxSize(def.word);
+				const layout = stickerLayout(def.word, canvasHeight);
 				const family = resolveFamily(def.font);
 
 				const wrapper = document.createElement("div");
 				Object.assign(wrapper.style, {
 					position: "absolute",
-					width: `${width}px`,
-					height: `${height}px`,
+					width: `${layout.visualWidth}px`,
+					height: `${layout.visualHeight}px`,
+					overflow: "visible",
 					pointerEvents: "none",
 				});
 				wrapper.dataset.x = String(def.x);
 				wrapper.dataset.y = String(def.y);
 				wrapper.dataset.rot = String(def.rot);
-				wrapper.dataset.width = String(width);
-				wrapper.dataset.height = String(height);
+				wrapper.dataset.wrapWidth = String(layout.visualWidth);
+				wrapper.dataset.wrapHeight = String(layout.visualHeight);
+
+				// Full-size WebGL canvas, visually scaled — peel renders inside the large canvas, not the small footprint.
+				const scaleRoot = document.createElement("div");
+				Object.assign(scaleRoot.style, {
+					position: "absolute",
+					left: "50%",
+					top: "50%",
+					width: `${layout.canvasWidth}px`,
+					height: `${layout.canvasHeight}px`,
+					transform: `translate(-50%, -50%) scale(${layout.visualScale})`,
+					transformOrigin: "center center",
+					overflow: "visible",
+					pointerEvents: "none",
+				});
 
 				const target = document.createElement("div");
 				Object.assign(target.style, {
-					display: "block",
 					width: "100%",
 					height: "100%",
+					display: "block",
 					pointerEvents: reduced ? "none" : "auto",
 					touchAction: "none",
 				});
-				wrapper.appendChild(target);
+				scaleRoot.appendChild(target);
+				wrapper.appendChild(scaleRoot);
+
+				// Position before mount — avoids the top-left pile-up while fonts/WebGL init.
+				positionWrapper(wrapper, W, H);
 				host.appendChild(wrapper);
 
 				const instance = await createSticker(target, {
@@ -171,6 +216,7 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 				}
 
 				mounted.push({ wrapper, instance });
+				layoutAll();
 
 				// Spread WebGL init across frames so first paint stays responsive.
 				await new Promise<void>((resolve) => {
@@ -207,8 +253,9 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 		<div
 			ref={hostRef}
 			aria-label="Interactive vinyl word stickers — drag the edge to peel"
-			className={className}
+			className={`overflow-visible ${className ?? ""}`}
 			role="img"
+			style={{ overflow: "visible" }}
 		/>
 	);
 }

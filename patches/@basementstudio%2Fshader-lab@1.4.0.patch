@@ -1,0 +1,150 @@
+diff --git a/node_modules/@basementstudio/shader-lab/.bun-tag-926a5d199e128095 b/.bun-tag-926a5d199e128095
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/src/shader-lab-composition.d.ts b/dist/src/shader-lab-composition.d.ts
+index 04a69b1c82f41b33fb9cbd9e88e9e22867146fe7..e63d0929de1ab4f708dccefad856d15c21cdda7a 100644
+--- a/dist/src/shader-lab-composition.d.ts
++++ b/dist/src/shader-lab-composition.d.ts
+@@ -12,7 +12,11 @@ export interface ShaderLabCompositionProps {
+      * not called again for consecutive identical messages.
+      */
+     onRuntimeError?: (message: string | null) => void;
++    /** PATCH (idsculpt): caps the device pixel ratio used for the canvas backing store. */
++    maxPixelRatio?: number;
++    /** PATCH (idsculpt): stops the render loop (renderer stays alive) while true. */
++    paused?: boolean;
+     style?: CSSProperties;
+ }
+ export declare function getShaderLabCompositionStyle(composition: ShaderLabConfig["composition"], style?: CSSProperties): CSSProperties;
+-export declare function ShaderLabComposition({ className, config, onRuntimeError, style, }: ShaderLabCompositionProps): import("react/jsx-runtime").JSX.Element;
++export declare function ShaderLabComposition({ className, config, maxPixelRatio, onRuntimeError, paused, style, }: ShaderLabCompositionProps): import("react/jsx-runtime").JSX.Element;
+diff --git a/dist/src/shader-lab-composition.js b/dist/src/shader-lab-composition.js
+index 145c2f0a3b484c1e41232a9337b38c4bde2c5949..88a8fc0e6aeebc9bb7873335ffdb0f666f75f171 100644
+--- a/dist/src/shader-lab-composition.js
++++ b/dist/src/shader-lab-composition.js
+@@ -17,12 +17,34 @@ export function getShaderLabCompositionStyle(composition, style) {
+         ...style,
+     };
+ }
+-export function ShaderLabComposition({ className, config, onRuntimeError, style, }) {
++// PATCH (idsculpt): added `maxPixelRatio` (caps render resolution) and `paused` (stops the rAF loop
++// without disposing the WebGPU renderer), and replaced the per-frame getBoundingClientRect with a
++// ResizeObserver-cached size to avoid forced layout every frame.
++export function ShaderLabComposition({ className, config, maxPixelRatio, onRuntimeError, paused = false, style, }) {
+     const canvasRef = useRef(null);
+     const frameRef = useRef(null);
+     const lastTimeRef = useRef(null);
+     const lastReportedErrorRef = useRef(null);
++    // Latest prop values read inside the frame loop (no effect re-run => no WebGPU re-init).
++    const pausedRef = useRef(paused);
++    const maxPixelRatioRef = useRef(maxPixelRatio);
++    // Set by the renderer effect so the pause effect can restart the loop.
++    const resumeRef = useRef(null);
+     const [runtimeError, setRuntimeError] = useState(null);
++    pausedRef.current = paused;
++    maxPixelRatioRef.current = maxPixelRatio;
++    // Pause: cancel the pending frame. Resume: restart the loop with a zero time delta.
++    useEffect(() => {
++        if (paused) {
++            if (frameRef.current !== null) {
++                window.cancelAnimationFrame(frameRef.current);
++                frameRef.current = null;
++            }
++            lastTimeRef.current = null;
++            return;
++        }
++        resumeRef.current?.();
++    }, [paused]);
+     useEffect(() => {
+         const canvas = canvasRef.current;
+         if (!canvas) {
+@@ -43,24 +65,52 @@ export function ShaderLabComposition({ className, config, onRuntimeError, style,
+         let cancelled = false;
+         let rendererPromise = null;
+         let runtimeRenderer = null;
+-        const getViewportSize = () => {
+-            const bounds = canvas.getBoundingClientRect();
+-            return {
+-                height: Math.max(1, Math.round(bounds.height)),
+-                width: Math.max(1, Math.round(bounds.width)),
+-            };
++        // Cached layout size; refreshed by ResizeObserver instead of reading layout every frame.
++        const initialBounds = canvas.getBoundingClientRect();
++        let cachedSize = {
++            height: Math.max(1, Math.round(initialBounds.height)),
++            width: Math.max(1, Math.round(initialBounds.width)),
+         };
++        const resizeObserver = typeof ResizeObserver === "undefined"
++            ? null
++            : new ResizeObserver((entries) => {
++                const box = entries[entries.length - 1]?.contentRect;
++                if (!box) {
++                    return;
++                }
++                cachedSize = {
++                    height: Math.max(1, Math.round(box.height)),
++                    width: Math.max(1, Math.round(box.width)),
++                };
++            });
++        resizeObserver?.observe(canvas);
++        const getViewportSize = () => cachedSize;
++        // Last size / pixel ratio actually applied to the renderer (see resize guard in renderFrame).
++        let appliedSize = null;
++        let appliedPixelRatio = null;
+         const renderFrame = (now) => {
+-            if (cancelled || !runtimeRenderer) {
++            frameRef.current = null;
++            if (cancelled || !runtimeRenderer || pausedRef.current) {
+                 return;
+             }
+             const previousTime = lastTimeRef.current ?? now;
+             const delta = Math.max(0, (now - previousTime) / 1000);
+             lastTimeRef.current = now;
+-            const devicePixelRatio = window.devicePixelRatio || 1;
++            const rawPixelRatio = window.devicePixelRatio || 1;
++            const cap = maxPixelRatioRef.current;
++            const devicePixelRatio = typeof cap === "number" && cap > 0 ? Math.min(rawPixelRatio, cap) : rawPixelRatio;
+             const viewportSize = getViewportSize();
+             const logicalSize = config.composition ?? viewportSize;
+-            runtimeRenderer.resize(viewportSize, devicePixelRatio);
++            // PATCH (idsculpt): three's setSize assigns canvas.width/height unconditionally, which
++            // reallocates the WebGPU drawing buffer. Only resize when size or pixel ratio changed.
++            if (appliedSize === null ||
++                appliedSize.width !== viewportSize.width ||
++                appliedSize.height !== viewportSize.height ||
++                appliedPixelRatio !== devicePixelRatio) {
++                runtimeRenderer.resize(viewportSize, devicePixelRatio);
++                appliedSize = viewportSize;
++                appliedPixelRatio = devicePixelRatio;
++            }
+             runtimeRenderer.render(buildRendererFrame(config, now / 1000, delta, devicePixelRatio, viewportSize, { logicalSize }));
+             frameRef.current = window.requestAnimationFrame(renderFrame);
+         };
+@@ -74,7 +124,17 @@ export function ShaderLabComposition({ className, config, onRuntimeError, style,
+             runtimeRenderer = renderer;
+             await renderer.initialize();
+             handleRuntimeError(null);
+-            frameRef.current = window.requestAnimationFrame(renderFrame);
++            // Expose a resume hook; only start drawing right away when not paused.
++            resumeRef.current = () => {
++                if (cancelled || !runtimeRenderer || frameRef.current !== null) {
++                    return;
++                }
++                lastTimeRef.current = null;
++                frameRef.current = window.requestAnimationFrame(renderFrame);
++            };
++            if (!pausedRef.current) {
++                resumeRef.current();
++            }
+         })
+             .catch((error) => {
+             handleRuntimeError(error instanceof Error
+@@ -83,6 +143,8 @@ export function ShaderLabComposition({ className, config, onRuntimeError, style,
+         });
+         return () => {
+             cancelled = true;
++            resumeRef.current = null;
++            resizeObserver?.disconnect();
+             lastTimeRef.current = null;
+             if (frameRef.current !== null) {
+                 window.cancelAnimationFrame(frameRef.current);

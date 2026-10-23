@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContactSectionPills } from "@/components/contact-section-pills";
 import { DesignApproachSection } from "@/components/design-approach-section";
-import { DesignTasteBentoSection } from "@/components/design-taste-bento-section";
 import { FadeFooter, FadeSection } from "@/components/fade-section";
+import { ImprovedIdentitiesSection } from "@/components/improved-identities-section";
 import { FooterDiaGradient } from "@/components/footer-dia-gradient";
 import { HeroShaderBackgroundLazy } from "@/components/hero-shader-background-lazy";
 import { siteFooterShellClassnames } from "@/components/site-footer";
@@ -117,6 +117,7 @@ export default function Home() {
 					))}
 				</div>
 			</FadeSection>
+			<ImprovedIdentitiesSection />
 			<DesignApproachSection />
 			<FooterDiaGradient />
 			<FadeSection
