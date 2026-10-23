@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { StickerInstance } from "@/types/sticker-forge";
 
 import { resolveFamily, warmStickerFonts } from "./font-utils";
 import { loadStickerForge } from "./sticker-forge-loader";
-import { STICKERS, type StickerDef } from "./stickers";
+import { STICKERS } from "./stickers";
 
 type WordStickersPlaygroundProps = {
 	className?: string;
@@ -52,14 +52,6 @@ function stickerLayout(word: string, canvasHeight: number) {
 	return { content, canvasWidth, canvasHeight, visualScale, visualWidth, visualHeight };
 }
 
-/** Fewer WebGL instances on touch / narrow viewports to protect mobile GPU. */
-function pickStickers(all: StickerDef[], coarse: boolean, narrow: boolean) {
-	if (!coarse && !narrow) return all;
-	const stride = coarse ? 2 : 1;
-	const picked = all.filter((_, i) => i % stride === 0);
-	return picked.length >= 6 ? picked : all.slice(0, 6);
-}
-
 interface MountedSticker {
 	wrapper: HTMLDivElement;
 	instance: StickerInstance;
@@ -69,18 +61,29 @@ interface MountedSticker {
  * Full-bleed peelable word stickers powered by sticker-forge (WebGL).
  * Host stays pointer-events-none; each sticker target re-enables drag-to-peel.
  */
+/** Touch phones and narrow windows do not get the WebGL stickers. */
+function stickersAllowed() {
+	const coarse = window.matchMedia("(pointer: coarse)").matches;
+	const narrow = window.matchMedia("(max-width: 767px)").matches;
+	return !coarse && !narrow;
+}
+
 export function WordStickersPlayground({ className }: WordStickersPlaygroundProps) {
 	const hostRef = useRef<HTMLDivElement>(null);
+	// False until measured so phones never mount the host or load the WebGL bundle.
+	const [showStickers, setShowStickers] = useState(false);
+
+	useEffect(() => {
+		setShowStickers(stickersAllowed());
+	}, []);
 
 	useEffect(() => {
 		const host = hostRef.current;
-		if (!host) return;
+		if (!showStickers || !host) return;
 
 		const parent = host.parentElement;
 		const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		const coarse = window.matchMedia("(pointer: coarse)").matches;
-		const narrow = window.matchMedia("(max-width: 767px)").matches;
-		const defs = pickStickers(STICKERS, coarse, narrow);
+		const defs = STICKERS;
 
 		let cancelled = false;
 		const mounted: MountedSticker[] = [];
@@ -139,9 +142,9 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 			syncHostSize();
 			measure();
 
-			const quality = coarse || narrow ? "medium" : "high";
-			const soundEnabled = !reduced && !coarse;
-			const canvasHeight = coarse || narrow ? 280 : STICKER_CANVAS_HEIGHT;
+			const quality = "high";
+			const soundEnabled = !reduced;
+			const canvasHeight = STICKER_CANVAS_HEIGHT;
 
 			for (let i = 0; i < defs.length; i++) {
 				if (cancelled) break;
@@ -247,7 +250,11 @@ export function WordStickersPlayground({ className }: WordStickersPlaygroundProp
 				wrapper.remove();
 			}
 		};
-	}, []);
+	}, [showStickers]);
+
+	if (!showStickers) {
+		return null;
+	}
 
 	return (
 		<div

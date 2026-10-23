@@ -1,10 +1,10 @@
-import { CONTACT_EMAIL, CONTACT_PHONE_TEL } from "@/lib/contact";
-/** Shared pill styling for contact section CTAs (email + phone). */
+import { CONTACT_EMAIL, CONTACT_WHATSAPP_HREF } from "@/lib/contact";
+/** Shared pill styling for contact section CTAs (email + WhatsApp). */
 const contactPillClassnames =
 	"inline-flex items-center rounded-full border border-black/10 bg-white/50 px-5 py-2.5 font-medium text-black text-sm uppercase backdrop-blur-sm transition-all duration-200 ease-out will-change-auto hover:scale-98 hover:opacity-50";
 
 /**
- * Email + phone pills used in the contact band on homepage, gallery, and about.
+ * Email + WhatsApp pills used in the contact band on homepage, gallery, and about.
  */
 export function ContactSectionPills() {
 	return (
@@ -15,11 +15,17 @@ export function ContactSectionPills() {
 					Email Us
 				</span>
 			</a>
-			<a className={contactPillClassnames} href={`tel:${CONTACT_PHONE_TEL}`}>
+			<a
+				className={contactPillClassnames}
+				href={CONTACT_WHATSAPP_HREF}
+				target="_blank"
+				rel="noopener noreferrer"
+			>
 				<span className="inline-flex items-center gap-1">
 					<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
-					Call Us
+					WhatsApp
 				</span>
-			</a>		</div>
+			</a>
+		</div>
 	);
 }
