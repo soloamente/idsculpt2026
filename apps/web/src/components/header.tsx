@@ -116,9 +116,48 @@ export default function Header() {
 			: "border border-black/10 bg-white/50 backdrop-blur-sm",
 	);
 
-	// Case-study deep dives use Figma chrome only (Return to projects + section pill).
+	// Case-study pages keep this bar (same hide-on-scroll and glass pill) with one link back to the gallery.
 	if (isCaseStudyDetailPath(pathname)) {
-		return null;
+		const isReturnNeonPlaying = navNeonFlash?.href === "/gallery";
+		return (
+			<header
+				className={cn(
+					"pointer-events-auto fixed top-0 right-0 left-0 z-40 flex w-screen justify-center transition-opacity duration-200 ease-out",
+					isHeaderHidden && "pointer-events-none opacity-0",
+				)}
+			>
+				<div className="relative mt-4 w-full bg-transparent p-4 px-8 text-sm uppercase shadow-neutral-500/5 md:text-base lg:text-lg">
+					<div
+						className={cn(
+							"relative flex items-center transition-colors duration-200 ease-out",
+							headerTextMode === "light" ? "text-white" : "text-black",
+						)}
+					>
+						<Link
+							className={cn(
+								"inline-flex items-center font-medium",
+								headerPillSurfaceClassnames,
+								navClassnames,
+								isReturnNeonPlaying && "transition-none",
+							)}
+							href={"/gallery" as Route<string>}
+							onClick={() => handleNavLinkClick("/gallery")}
+						>
+							<span
+								key={isReturnNeonPlaying ? String(navNeonFlash?.token) : "idle"}
+								className={cn(
+									"inline-flex items-center gap-1",
+									isReturnNeonPlaying && "header-nav-neon-blink",
+								)}
+							>
+								<span aria-hidden className="size-[0.4em] shrink-0 bg-current" />
+								Return to projects
+							</span>
+						</Link>
+					</div>
+				</div>
+			</header>
+		);
 	}
 
 	return (

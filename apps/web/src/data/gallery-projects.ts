@@ -15,7 +15,7 @@ export function getGalleryProjectBySlug(
 	return galleryProjects.find((project) => project.slug === slug);
 }
 
-/** True on immersive case-study routes (`/gallery/chili-riders`, etc.) — no site header. */
+/** True on immersive case-study routes (`/gallery/chili-riders`, etc.) — header shows Return to projects. */
 export function isCaseStudyDetailPath(pathname: string): boolean {
 	const segments = pathname.split("/").filter(Boolean);
 	if (segments.length !== 2 || segments[0] !== "gallery") {
@@ -76,7 +76,7 @@ export const galleryProjects: GalleryProject[] = [
 		type: "Interface design",
 		slug: "navia",
 		isCaseStudy: true,
-		footerPreviewImage: "/images/case-studies/navia/05-brand.png",
+		footerPreviewImage: "/images/case-studies/navia/05-brand.webp",
 	},
 	{
 		images: ["/images/lonewolf.png"],

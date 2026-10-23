@@ -186,18 +186,15 @@ export function CaseStudyPageContent({ study }: CaseStudyPageContentProps) {
 		<motion.main
 			animate={pageAnimate}
 			className="relative min-h-screen bg-[#f9f9f9] pb-[calc(139px+5rem)]"
-			data-header-text="dark"
 			initial={pageEnter}
 			transition={pageTransition}
 		>
-			<div className="relative flex w-full flex-col items-center gap-[206px] px-[18px] pt-40 md:px-7">
-				<CaseStudyPillLink
-					className="absolute left-[18px] top-[37px] z-20 md:left-7"
-					href="/gallery"
-				>
-					Return to projects
-				</CaseStudyPillLink>
-
+			{/* id + data-header-text so the fixed return bar uses the same light-page contrast as the home nav. */}
+			<div
+				className="relative flex w-full flex-col items-center gap-[206px] px-[18px] pt-40 md:px-7"
+				data-header-text="dark"
+				id="case-study-page"
+			>
 				{scrollStudies.map((doc) => (
 					<CaseStudyScrollBlock key={doc.slug} study={doc} />
 				))}
