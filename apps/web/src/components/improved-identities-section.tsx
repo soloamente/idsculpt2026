@@ -2,6 +2,7 @@
 
 import { cn } from "@idsculpt/ui/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -30,7 +31,8 @@ interface ImprovedIdentitySlide {
 	alt: string;
 	headline: string;
 	subline: string;
-	href?: string;
+	/** Typed route so `next/link` accepts it with `typedRoutes` enabled. */
+	href?: Route;
 }
 
 const improvedIdentitySlides: ImprovedIdentitySlide[] = [
