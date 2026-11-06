@@ -16,6 +16,9 @@ export const metadata: Metadata = {
 	title: "Identity Sculpt",
 	description:
 		"Identity Sculpt is a design studio that creates unique and memorable brand identities for businesses and organizations.",
+	icons: {
+		icon: [{ url: "/favicon.png", type: "image/png" }],
+	},
 };
 
 export default function RootLayout({
