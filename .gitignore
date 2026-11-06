@@ -56,3 +56,6 @@ coverage
 .cache
 tmp
 temp
+
+# reanimate evidence (frames, sheets, compare reports)
+.reanimate/

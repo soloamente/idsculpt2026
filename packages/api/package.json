@@ -1,22 +1,22 @@
 {
-  "name": "@idsculpt26/api",
-  "type": "module",
-  "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
-  },
-  "scripts": {
-    "check-types": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@idsculpt26/auth": "workspace:*",
-    "@idsculpt26/db": "workspace:*",
-    "@trpc/client": "catalog:",
-    "@trpc/server": "catalog:",
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@idsculpt26/config": "workspace:*",
-    "typescript": "catalog:"
-  }
+	"name": "@idsculpt26/api",
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"check-types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@idsculpt26/auth": "workspace:*",
+		"@idsculpt26/db": "workspace:*",
+		"@trpc/client": "catalog:",
+		"@trpc/server": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@idsculpt26/config": "workspace:*",
+		"typescript": "catalog:"
+	}
 }

@@ -1,0 +1,33 @@
+===== line 1 =====
+\nImplement this design from Figma.\n@https://www.figma.com/design/SIZpOwfCaMXIa709Xdh8NL/IDSC---WEB?node-id=977-277&m=dev\n\nnavbar component \n
+
+===== line 78 =====
+\nfont regular default\n
+
+===== line 92 =====
+\nImplement this design from Figma.\n@https://www.figma.com/design/SIZpOwfCaMXIa709Xdh8NL/IDSC---WEB?node-id=977-93&m=dev\n\nsection under navbar\n
+
+===== line 108 =====
+\nwatch the spacing, and the changes\n\nImplement this design from Figma.\n@https://www.figma.com/design/SIZpOwfCaMXIa709Xdh8NL/IDSC---WEB?node-id=977-85&m=dev\n
+
+===== line 144 =====
+\nadd also this project sections\n
+
+===== line 146 =====
+\nadd also this project sections\n
+
+===== line 194 =====
+\nremove the shader runtime\n
+
+===== line 205 =====
+Briefly inform the user about the task result and perform any follow-up actions (if needed). If there's no follow-ups needed, don't explicitly say that.
+
+===== line 208 =====
+\nDOM Path: div.page\nPosition: top=0px, left=0px, width=1825px, height=3361px\nHTML Element: <div class=\"page\" data-cursor-element-id=\"cursor-el-1\">PERMANENT Companies About Internship Reach out Design culture, hands-on. Itâ€™s not a project. Itâ€™s not a sprint. We embed designers into companies, fractionally. Founders that put care into what they</div> see the layout from this, i want the same carousel of image effect there\n
+
+===== line 223 =====
+\n## Page Feedback: /\n**Viewport:** 2552Ã—1322\n\n### 1. <WorkCarousel> flex items\n**Location:** .mt-[87px] > .flex > .flex > .flex\n**React:** <WorkCarousel>\n**Feedback:** remove\n\n## Page Feedback: /\n**Viewport:** 2552Ã—1322\n\n### 1. <WorkCarousel> div [Selected work]\n**Location:** .mt-[87px] > .flex > .flex > .group/carousel\n**React:** <WorkCarousel>\n**Feedback:** make it bigger, i dont want it to stop on hover unless i stop the cycle with drag. Also on hover i want the cursor to change into a arrow icon to go forward on the right if i am on the right sie and left side if im left side\n\n## Page Feedback: /\n**Viewport:** 2552Ã—1322\n\n### 1. <__next_root_layout_boundary__> <Providers> grid min\n**Location:** .grid\n**React:** <__next_root_layout_boundary__> <Providers>\n**Feedback:** increase spacing, i want the carousel to be at end of viewport like a hero section like here DOM Path: div.page\nPosition: top=0px, left=0px, width=1825px, height=3361px\nHTML Element: <div class=\"page\" data-cursor-element-id=\"cursor-el-1\">PER=A.(NT Companies About Internship Reach out Design culture, hands-on. Itâ€™s not a project. Itâ€™s not a sprint. We embed designers into companies, fractionally. Founders that put care into what they</div> \n
+
+===== line 235 =====
+\n## Page Feedback: /\n**Viewport:** 2069Ã—1322\n\n### 1. flex shrink\n**Location:** .grid > .flex > .flex > .flex\n**Feedback:** separate this section from the carousel and also ass spacing \n\ncopy how the sections here are made DOM Path: div.page\nPosition: top=0px, left=0px, width=1825px, height=3361px\nHTML Element: <div class=\"page\" data-cursor-element-id=\"cursor-el-1\">PERMANENT Companies About Internship Reach out Design culture, hands-on. Itâ€™s not a project. Itâ€™s not a sprint. We embed designers into companies, fractionally. Founders that put care into what they</div> \n
+

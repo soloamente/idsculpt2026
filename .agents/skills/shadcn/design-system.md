@@ -150,13 +150,13 @@ Every token without a shadcn slot gets a variable in `:root` (and `.dark` when i
 
 ```css
 :root {
-  --primary-active: #a9583e;
-  --surface-card: #efe9de;
+	--primary-active: #a9583e;
+	--surface-card: #efe9de;
 }
 
 @theme inline {
-  --color-primary-active: var(--primary-active);
-  --color-surface-card: var(--surface-card);
+	--color-primary-active: var(--primary-active);
+	--color-surface-card: var(--surface-card);
 }
 ```
 
@@ -175,14 +175,14 @@ A DESIGN.md radius scale rarely fits the `--radius` multipliers. Pin each step i
 
 ```css
 @theme inline {
-  /* DESIGN.md step → Tailwind class used by that component. */
-  --radius-sm: 4px; /* xs: accents. */
-  --radius-md: 6px; /* sm: menu items. */
-  --radius-lg: 8px; /* md: buttons, inputs. */
-  --radius-xl: 12px; /* lg: cards, dialogs. */
-  --radius-2xl: 16px; /* xl: toasts, hero containers. */
-  --radius-3xl: 16px;
-  --radius-4xl: 9999px; /* pill: badges. */
+	/* DESIGN.md step → Tailwind class used by that component. */
+	--radius-sm: 4px; /* xs: accents. */
+	--radius-md: 6px; /* sm: menu items. */
+	--radius-lg: 8px; /* md: buttons, inputs. */
+	--radius-xl: 12px; /* lg: cards, dialogs. */
+	--radius-2xl: 16px; /* xl: toasts, hero containers. */
+	--radius-3xl: 16px;
+	--radius-4xl: 9999px; /* pill: badges. */
 }
 ```
 
@@ -200,9 +200,9 @@ Override Tailwind's shadow scale in `@theme`, not `@theme inline`. Copy multi-la
 
 ```css
 @theme {
-  --shadow-xs: 0 0 #0000;
-  --shadow-sm: 0 1px 3px rgb(20 20 19 / 0.08);
-  --shadow-lg: 0 1px 3px rgb(20 20 19 / 0.08), 0 8px 24px rgb(20 20 19 / 0.06);
+	--shadow-xs: 0 0 #0000;
+	--shadow-sm: 0 1px 3px rgb(20 20 19 / 0.08);
+	--shadow-lg: 0 1px 3px rgb(20 20 19 / 0.08), 0 8px 24px rgb(20 20 19 / 0.06);
 }
 ```
 
@@ -220,10 +220,10 @@ npm install @fontsource-variable/inter @fontsource-variable/cormorant-garamond @
 @import "@fontsource-variable/jetbrains-mono";
 
 @theme inline {
-  --font-sans: "Inter Variable", -apple-system, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond Variable", Garamond, serif;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+	--font-sans: "Inter Variable", -apple-system, system-ui, sans-serif;
+	--font-serif: "Cormorant Garamond Variable", Garamond, serif;
+	--font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+	--font-heading: var(--font-sans);
 }
 ```
 
@@ -235,18 +235,18 @@ Turn every typography token into a `type-*` utility. Don't use `--text-*` theme 
 
 ```css
 @utility type-display-lg {
-  font-family: var(--font-serif);
-  font-size: clamp(34px, 3vw + 16px, 48px);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.021em;
+	font-family: var(--font-serif);
+	font-size: clamp(34px, 3vw + 16px, 48px);
+	font-weight: 500;
+	line-height: 1.1;
+	letter-spacing: -0.021em;
 }
 
 @utility type-caption-upper {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: 1.5px;
+	text-transform: uppercase;
 }
 ```
 
@@ -267,18 +267,18 @@ Match the documented focus treatment:
 
 ```css
 :is(
-  button,
-  a[href],
-  [role="button"],
-  [role="tab"],
-  [role="checkbox"],
-  [role="radio"],
-  [role="switch"],
-  [role="slider"]
+	button,
+	a[href],
+	[role="button"],
+	[role="tab"],
+	[role="checkbox"],
+	[role="radio"],
+	[role="switch"],
+	[role="slider"]
 ):focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-  --tw-ring-shadow: 0 0 #0000;
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
+	--tw-ring-shadow: 0 0 #0000;
 }
 ```
 

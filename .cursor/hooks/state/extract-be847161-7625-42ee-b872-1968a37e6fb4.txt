@@ -1,0 +1,24 @@
+===== line 1 =====
+\n/reanimate this animation when clicking digital lab in the navbar https://pda.archi/en/digital-lab when clicking Digital Lab in https://pda.archi/en, when clicking our logo \"I/S\" shoing the 4  of our team members. /emil-product-thinking\n
+
+===== line 72 =====
+\nbtw like in https://pda.archi/en/digital-lab there are two pages, the navbar is in https://pda.archi/en and i think it is a page transition\n
+
+===== line 100 =====
+\nlike i said, it should be a page transition feature cause like in the original site, the navbar connect to another page different than home for design lab\n
+
+===== line 135 =====
+Briefly inform the user about the task result and perform any follow-up actions (if needed).
+
+===== line 137 =====
+\nwhen i click to go to home page, the animation dont start from the start of the page but it starts like 1 third of the screen already, maybe cause it doesnt count the dimensions of the viewport? check again https://pda.archi/en  /reanimate \n
+
+===== line 149 =====
+\nits still doing the same, look at the red square, u can see the next page gets animation but it gets a cut but there is more under. i guess this bug happens bc the home page has a height longer than the viewport, \n
+
+===== line 158 =====
+\nstill happens, now the section is less but there is still\n
+
+===== line 196 =====
+\nthere still is a bit small fraction that can be seen\n
+

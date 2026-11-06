@@ -1,13 +1,14 @@
 ---
+
 name: next-partial-prefetching-adoption
 description: >
-  Turn on Partial Prefetching in a Next.js app and work through the
-  insights it surfaces. Use when the user wants to enable or adopt
-  Partial Prefetching, flip the `partialPrefetching` flag, opt routes
-  in with `export const prefetch = 'partial'`, audit
-  `Link prefetch={true}` behavior, preserve existing prefetched UI
-  with `instant()` tests, or resolve the
-  instant-link-prefetch-partial and instant-shell-url-data insights.
+Turn on Partial Prefetching in a Next.js app and work through the
+insights it surfaces. Use when the user wants to enable or adopt
+Partial Prefetching, flip the `partialPrefetching` flag, opt routes
+in with `export const prefetch = 'partial'`, audit
+`Link prefetch={true}` behavior, preserve existing prefetched UI
+with `instant()` tests, or resolve the
+instant-link-prefetch-partial and instant-shell-url-data insights.
 ---
 
 # next-partial-prefetching-adoption

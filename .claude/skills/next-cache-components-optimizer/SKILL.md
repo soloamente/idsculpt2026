@@ -1,14 +1,15 @@
 ---
+
 name: next-cache-components-optimizer
 description: >
-  Optimize the meaningful UI available immediately from a Next.js route on an
-  initial load (hard navigation) or named client-side navigation (soft
-  navigation). Encode the goal as a failing @next/playwright instant() e2e and
-  work it to green, one verified route and entry point at a time; the shipped
-  test then guards against regression. Use when asked to grow a static shell,
-  fix a slow first paint or non-instant navigation, diagnose which Suspense
-  boundary blocks useful UI, or add instant() regression coverage. Requires
-  Next.js 16.3+ with Cache Components already adopted.
+Optimize the meaningful UI available immediately from a Next.js route on an
+initial load (hard navigation) or named client-side navigation (soft
+navigation). Encode the goal as a failing @next/playwright instant() e2e and
+work it to green, one verified route and entry point at a time; the shipped
+test then guards against regression. Use when asked to grow a static shell,
+fix a slow first paint or non-instant navigation, diagnose which Suspense
+boundary blocks useful UI, or add instant() regression coverage. Requires
+Next.js 16.3+ with Cache Components already adopted.
 ---
 
 # next-cache-components-optimizer
@@ -364,10 +365,10 @@ PR-specific items:
 - [ ] **Differential shown**: RED without the fix, GREEN with it, runs linked.
 - [ ] **Parity confirmed (E)**: same content, redirects, and state.
 - [ ] **Mutations verified when applicable**: after populating any cache whose
-      data can be updated, a mutation test confirms the next read returns the
-      expected data.
+  data can be updated, a mutation test confirms the next read returns the
+  expected data.
 - [ ] **Freshness preserved**: new cache scopes follow the data's existing or
-      explicitly chosen lifetime.
+  explicitly chosen lifetime.
 - [ ] **Existing loading UI reused (D1)**: no new page-mirroring skeleton.
 - [ ] **Shell matches the real render at supported viewports (D2)**.
 - [ ] **Baseline removed**: only the locked test from C remains.

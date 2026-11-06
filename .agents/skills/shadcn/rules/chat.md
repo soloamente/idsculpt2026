@@ -38,37 +38,37 @@ track visibility, and jump to it. `MessageScrollerButton` sits inside
 ```tsx
 // Hand-rolled scroll container with manual stick-to-bottom logic.
 <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto">
-  <div className="flex flex-col gap-6 p-4">
-    {messages.map((m) => (
-      <ChatMessage key={m.id} message={m} />
-    ))}
-  </div>
-</div>
+	<div className="flex flex-col gap-6 p-4">
+		{messages.map((m) => (
+			<ChatMessage key={m.id} message={m} />
+		))}
+	</div>
+</div>;
 ```
 
 **Correct:**
 
 ```tsx
 <MessageScrollerProvider autoScroll>
-  <MessageScroller>
-    <MessageScrollerViewport>
-      <MessageScrollerContent>
-        {messages.map((message) => (
-          <MessageScrollerItem
-            key={message.id}
-            messageId={message.id}
-            scrollAnchor={message.role === "user"}
-          >
-            <Message align={message.role === "user" ? "end" : "start"}>
-              {/* ...message content... */}
-            </Message>
-          </MessageScrollerItem>
-        ))}
-      </MessageScrollerContent>
-    </MessageScrollerViewport>
-    <MessageScrollerButton />
-  </MessageScroller>
-</MessageScrollerProvider>
+	<MessageScroller>
+		<MessageScrollerViewport>
+			<MessageScrollerContent>
+				{messages.map((message) => (
+					<MessageScrollerItem
+						key={message.id}
+						messageId={message.id}
+						scrollAnchor={message.role === "user"}
+					>
+						<Message align={message.role === "user" ? "end" : "start"}>
+							{/* ...message content... */}
+						</Message>
+					</MessageScrollerItem>
+				))}
+			</MessageScrollerContent>
+		</MessageScrollerViewport>
+		<MessageScrollerButton />
+	</MessageScroller>
+</MessageScrollerProvider>;
 ```
 
 ---
@@ -83,20 +83,20 @@ rebuild the row from flex divs.
 
 ```tsx
 <Message align="start">
-  <MessageAvatar>
-    <Avatar>
-      <AvatarImage src={sender.avatar} alt={sender.name} />
-      <AvatarFallback>{initials}</AvatarFallback>
-    </Avatar>
-  </MessageAvatar>
-  <MessageContent>
-    <MessageHeader>{sender.name}</MessageHeader>
-    <Bubble>
-      <BubbleContent>{text}</BubbleContent>
-    </Bubble>
-    <MessageFooter>{time}</MessageFooter>
-  </MessageContent>
-</Message>
+	<MessageAvatar>
+		<Avatar>
+			<AvatarImage src={sender.avatar} alt={sender.name} />
+			<AvatarFallback>{initials}</AvatarFallback>
+		</Avatar>
+	</MessageAvatar>
+	<MessageContent>
+		<MessageHeader>{sender.name}</MessageHeader>
+		<Bubble>
+			<BubbleContent>{text}</BubbleContent>
+		</Bubble>
+		<MessageFooter>{time}</MessageFooter>
+	</MessageContent>
+</Message>;
 ```
 
 ---
@@ -116,18 +116,20 @@ with absolutely-positioned `Badge`s.
 **Incorrect:**
 
 ```tsx
-<div className="w-fit rounded-2xl bg-primary px-3 py-2 text-primary-foreground">{text}</div>
+<div className="w-fit rounded-2xl bg-primary px-3 py-2 text-primary-foreground">
+	{text}
+</div>;
 ```
 
 **Correct:**
 
 ```tsx
 <Bubble variant="default" align="end">
-  <BubbleContent>{text}</BubbleContent>
-  <BubbleReactions side="bottom" align="end">
-    <Badge variant="secondary">👍 2</Badge>
-  </BubbleReactions>
-</Bubble>
+	<BubbleContent>{text}</BubbleContent>
+	<BubbleReactions side="bottom" align="end">
+		<Badge variant="secondary">👍 2</Badge>
+	</BubbleReactions>
+</Bubble>;
 ```
 
 ---
@@ -145,19 +147,19 @@ separate spinner.
 
 ```tsx
 <Attachment state="done">
-  <AttachmentMedia variant="icon">
-    <FileTextIcon />
-  </AttachmentMedia>
-  <AttachmentContent>
-    <AttachmentTitle>homepage-feedback.pdf</AttachmentTitle>
-    <AttachmentDescription>PDF · 2.4 MB</AttachmentDescription>
-  </AttachmentContent>
-  <AttachmentActions>
-    <AttachmentAction>
-      <DownloadIcon />
-    </AttachmentAction>
-  </AttachmentActions>
-</Attachment>
+	<AttachmentMedia variant="icon">
+		<FileTextIcon />
+	</AttachmentMedia>
+	<AttachmentContent>
+		<AttachmentTitle>homepage-feedback.pdf</AttachmentTitle>
+		<AttachmentDescription>PDF · 2.4 MB</AttachmentDescription>
+	</AttachmentContent>
+	<AttachmentActions>
+		<AttachmentAction>
+			<DownloadIcon />
+		</AttachmentAction>
+	</AttachmentActions>
+</Attachment>;
 ```
 
 For an image, use `<AttachmentMedia variant="image">` with an `img` child.
@@ -177,18 +179,18 @@ labeled separators are `Marker`, not a `Separator` plus a centered span.
 
 ```tsx
 <div className="flex items-center gap-3 py-2">
-  <Separator className="flex-1" />
-  <span className="text-xs text-muted-foreground">Today</span>
-  <Separator className="flex-1" />
-</div>
+	<Separator className="flex-1" />
+	<span className="text-xs text-muted-foreground">Today</span>
+	<Separator className="flex-1" />
+</div>;
 ```
 
 **Correct:**
 
 ```tsx
 <Marker variant="separator">
-  <MarkerContent>Today</MarkerContent>
-</Marker>
+	<MarkerContent>Today</MarkerContent>
+</Marker>;
 ```
 
 ---
@@ -290,66 +292,66 @@ const [open, setOpen] = useState(true)
 
 ```tsx
 <TraceCollapsible>
-  <TraceCollapsibleTrigger>
-    <TraceLine status={running ? "running" : undefined}>
-      <TraceIcon>
-        <BrainIcon />
-      </TraceIcon>
-      <TraceTitle>{running ? "Thinking" : "Thought"}</TraceTitle>
-    </TraceLine>
-  </TraceCollapsibleTrigger>
-  <TraceCollapsibleContent>{part.text}</TraceCollapsibleContent>
-</TraceCollapsible>
+	<TraceCollapsibleTrigger>
+		<TraceLine status={running ? "running" : undefined}>
+			<TraceIcon>
+				<BrainIcon />
+			</TraceIcon>
+			<TraceTitle>{running ? "Thinking" : "Thought"}</TraceTitle>
+		</TraceLine>
+	</TraceCollapsibleTrigger>
+	<TraceCollapsibleContent>{part.text}</TraceCollapsibleContent>
+</TraceCollapsible>;
 ```
 
 **Incorrect:** a tool row whose output may not exist yet.
 
 ```tsx
 <TraceCollapsible>
-  <TraceCollapsibleTrigger>
-    <TraceLine status={status}>…</TraceLine>
-  </TraceCollapsibleTrigger>
-  {output && <TraceCollapsibleContent>{output}</TraceCollapsibleContent>}
-</TraceCollapsible>
+	<TraceCollapsibleTrigger>
+		<TraceLine status={status}>…</TraceLine>
+	</TraceCollapsibleTrigger>
+	{output && <TraceCollapsibleContent>{output}</TraceCollapsibleContent>}
+</TraceCollapsible>;
 ```
 
 **Correct:** a `TraceLine` until there is something to open.
 
 ```tsx
 function ToolRow({
-  icon,
-  title,
-  status,
-  output,
+	icon,
+	title,
+	status,
+	output,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  status?: "running" | "error";
-  output?: string;
+	icon: React.ReactNode;
+	title: string;
+	status?: "running" | "error";
+	output?: string;
 }) {
-  const line = (
-    <TraceLine status={status}>
-      <TraceIcon>{icon}</TraceIcon>
-      <TraceTitle>{title}</TraceTitle>
-    </TraceLine>
-  );
+	const line = (
+		<TraceLine status={status}>
+			<TraceIcon>{icon}</TraceIcon>
+			<TraceTitle>{title}</TraceTitle>
+		</TraceLine>
+	);
 
-  if (output === undefined) {
-    return line;
-  }
+	if (output === undefined) {
+		return line;
+	}
 
-  return (
-    <TraceCollapsible>
-      <TraceCollapsibleTrigger>{line}</TraceCollapsibleTrigger>
-      <TraceCollapsibleContent>
-        <CodeBlock size="sm">
-          <CodeBlockContent wrap className="max-h-64">
-            {output}
-          </CodeBlockContent>
-        </CodeBlock>
-      </TraceCollapsibleContent>
-    </TraceCollapsible>
-  );
+	return (
+		<TraceCollapsible>
+			<TraceCollapsibleTrigger>{line}</TraceCollapsibleTrigger>
+			<TraceCollapsibleContent>
+				<CodeBlock size="sm">
+					<CodeBlockContent wrap className="max-h-64">
+						{output}
+					</CodeBlockContent>
+				</CodeBlock>
+			</TraceCollapsibleContent>
+		</TraceCollapsible>
+	);
 }
 ```
 
@@ -357,45 +359,45 @@ function ToolRow({
 
 ```tsx
 <Sheet>
-  <SheetTrigger asChild>
-    <TraceLine>…</TraceLine>
-  </SheetTrigger>
-</Sheet>
+	<SheetTrigger asChild>
+		<TraceLine>…</TraceLine>
+	</SheetTrigger>
+</Sheet>;
 ```
 
 **Correct:** sources, each link wrapping its own line.
 
 ```tsx
 <TraceCollapsible>
-  <TraceCollapsibleTrigger>
-    <TraceLine>
-      <TraceIcon>
-        <GlobeIcon />
-      </TraceIcon>
-      <TraceTitle>Used {sources.length} sources</TraceTitle>
-    </TraceLine>
-  </TraceCollapsibleTrigger>
-  <TraceCollapsibleContent>
-    <Trace>
-      {sources.map((source) => (
-        <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
-          <TraceLine>
-            <TraceIcon>
-              <GlobeIcon />
-            </TraceIcon>
-            <TraceTitle>
-              {source.title}
-              <span className="sr-only"> (opens in a new tab)</span>
-            </TraceTitle>
-            <TraceIcon>
-              <ArrowUpRightIcon />
-            </TraceIcon>
-          </TraceLine>
-        </a>
-      ))}
-    </Trace>
-  </TraceCollapsibleContent>
-</TraceCollapsible>
+	<TraceCollapsibleTrigger>
+		<TraceLine>
+			<TraceIcon>
+				<GlobeIcon />
+			</TraceIcon>
+			<TraceTitle>Used {sources.length} sources</TraceTitle>
+		</TraceLine>
+	</TraceCollapsibleTrigger>
+	<TraceCollapsibleContent>
+		<Trace>
+			{sources.map((source) => (
+				<a key={source.url} href={source.url} target="_blank" rel="noreferrer">
+					<TraceLine>
+						<TraceIcon>
+							<GlobeIcon />
+						</TraceIcon>
+						<TraceTitle>
+							{source.title}
+							<span className="sr-only"> (opens in a new tab)</span>
+						</TraceTitle>
+						<TraceIcon>
+							<ArrowUpRightIcon />
+						</TraceIcon>
+					</TraceLine>
+				</a>
+			))}
+		</Trace>
+	</TraceCollapsibleContent>
+</TraceCollapsible>;
 ```
 
 ---
@@ -425,23 +427,25 @@ a `CodeBlock`, never a hand-rolled `<pre>`.
 **Incorrect:**
 
 ```tsx
-<pre className="rounded-md bg-muted p-3 font-mono text-xs whitespace-pre-wrap">{output}</pre>
+<pre className="rounded-md bg-muted p-3 font-mono text-xs whitespace-pre-wrap">
+	{output}
+</pre>;
 ```
 
 **Correct:**
 
 ```tsx
 <CodeBlock>
-  <CodeBlockHeader>
-    <CodeBlockTitle>Output</CodeBlockTitle>
-    <CodeBlockActions>
-      <CodeBlockCopyButton value={output} />
-    </CodeBlockActions>
-  </CodeBlockHeader>
-  <CodeBlockContent wrap className="max-h-72">
-    {output}
-  </CodeBlockContent>
-</CodeBlock>
+	<CodeBlockHeader>
+		<CodeBlockTitle>Output</CodeBlockTitle>
+		<CodeBlockActions>
+			<CodeBlockCopyButton value={output} />
+		</CodeBlockActions>
+	</CodeBlockHeader>
+	<CodeBlockContent wrap className="max-h-72">
+		{output}
+	</CodeBlockContent>
+</CodeBlock>;
 ```
 
 ---

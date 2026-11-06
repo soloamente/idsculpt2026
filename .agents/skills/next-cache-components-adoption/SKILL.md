@@ -1,12 +1,13 @@
 ---
+
 name: next-cache-components-adoption
 description: >
-  Turn on Cache Components in a Next.js app and resolve the blocking routes it
-  surfaces. Use when the user wants to enable, adopt, or migrate to Cache
-  Components, flip the `cacheComponents` flag, work through a flood of
-  blocking-prerender / instant validation errors, run the
-  `cache-components-instant-false` codemod, or decide between opting routes out
-  with `export const instant = false` and fixing them in place.
+Turn on Cache Components in a Next.js app and resolve the blocking routes it
+surfaces. Use when the user wants to enable, adopt, or migrate to Cache
+Components, flip the `cacheComponents` flag, work through a flood of
+blocking-prerender / instant validation errors, run the
+`cache-components-instant-false` codemod, or decide between opting routes out
+with `export const instant = false` and fixing them in place.
 ---
 
 # next-cache-components-adoption

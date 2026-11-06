@@ -1,1 +1,1931 @@
 @import "@idsculpt26/ui/globals.css";
+/* SSR + first paint: skeleton styles before Skullet’s inline measure script runs. */
+@import "skullet/styles.css";
+
+/*
+ * Page push: navigating between pages (the I/S logo links / and /team) pushes the new page in
+ * from above while the old page drops and dims, via React <ViewTransition> + the View Transitions API. Numbers are measured from the reference (see .reanimate/digital-lab/spec.md).
+ */
+:root {
+	/* Home / marketing ink — warm neutrals tied to the light studio surface. */
+	--home-ink: oklch(0.191 0 0);
+	--home-ink-muted: color-mix(in oklch, var(--home-ink) 70%, transparent);
+	--home-ink-faint: color-mix(in oklch, var(--home-ink) 50%, transparent);
+	--home-border-subtle: rgb(0 0 0 / 0.08);
+
+	/* Fallback for browsers without linear(): close to the measured curve, a bit shorter tail. */
+	--push-ease: cubic-bezier(0.5, 0.2, 0, 1);
+	--push-duration: 1960ms;
+	/* Wait before the push starts: the reference moves ~221ms after the click, our transition starts ~101ms after it. */
+	--push-delay: 120ms;
+	/* Expo-out used for the card growth and the caption roll. */
+	--roll-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@supports (animation-timing-function: linear(0, 1)) {
+	:root {
+		/* 49 stops sampled every 40ms from the reference page push: slow start, steep middle, long exponential tail. */
+		--push-ease: linear(
+			0,
+			0.0169,
+			0.0254,
+			0.0501,
+			0.0753,
+			0.1185,
+			0.1751,
+			0.2872,
+			0.3802,
+			0.5107,
+			0.5983,
+			0.6975,
+			0.7777,
+			0.8365,
+			0.8722,
+			0.897,
+			0.9174,
+			0.9333,
+			0.9455,
+			0.9553,
+			0.9627,
+			0.9689,
+			0.974,
+			0.9781,
+			0.9815,
+			0.9844,
+			0.9868,
+			0.9888,
+			0.9904,
+			0.992,
+			0.9933,
+			0.9943,
+			0.9953,
+			0.9961,
+			0.9967,
+			0.9974,
+			0.9979,
+			0.9983,
+			0.9986,
+			0.999,
+			0.9992,
+			0.9994,
+			0.9996,
+			0.9997,
+			0.9998,
+			0.9999,
+			0.9999,
+			1,
+			1
+		);
+	}
+}
+
+/* The same push plays in both directions: the incoming page always enters from above (spec.md).
+   It moves the clipped one-viewport box of the incoming page. */
+@keyframes push-in-box {
+	from {
+		translate: 0 -100vh;
+	}
+	to {
+		translate: 0 0;
+	}
+}
+
+/* While the box slides its bottom edge lands between device pixels, and the browser can round the clip
+   outward and draw one extra row of the page below the cut (a hairline under the seam). Pulling the clip
+   1px inside the box keeps that row inside the box. It opens to the full box only for the last instant,
+   when the box is at rest on whole pixels, so no dark line is left at the bottom of the screen.
+   The push-ease curve is within 1px of rest for its last ~20%, so the clip opens at 78-80% (opening it
+   later would leave a 1px dark line of the old page at the bottom for ~400ms). */
+@keyframes push-in-clip {
+	from,
+	78% {
+		clip-path: inset(0 0 1px 0);
+	}
+	80%,
+	to {
+		clip-path: inset(0);
+	}
+}
+
+@keyframes push-out {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		/* 200px on a 900px viewport, 178px on 700px. */
+		transform: translateY(calc(100px + 100vh / 9));
+	}
+}
+
+/* The reference lays a #161616 veil at ~0.9 over the outgoing page; brightness() gives the same result on a snapshot (white -> ~#2b2b2b). */
+@keyframes push-dim {
+	from {
+		filter: brightness(1);
+	}
+	to {
+		filter: brightness(0.17);
+	}
+}
+
+/* Text rises out of an overflow-hidden mask. */
+@keyframes mask-roll {
+	from {
+		transform: translateY(100%);
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+
+/* Incoming page sits on top of the outgoing one (groups are stacked by z-index). */
+::view-transition-group(.page-push-in) {
+	z-index: 2;
+	/* The reference's entering page is position: fixed and exactly one viewport tall, whatever the
+	   page's real length (home is ~10000px there). A snapshot is the whole element, so without this a
+	   taller page (our home, ~1140px) would already show its bottom third when the slide from -100vh begins.
+	   The clipped box itself has to move (not the image inside it), otherwise the clip edge stays put and the
+	   page's real bottom still leads. `translate` stacks on the browser's own positioning `transform`. */
+	height: 100vh;
+	overflow: clip;
+	animation:
+		push-in-box var(--push-duration) var(--push-ease) var(--push-delay) both,
+		push-in-clip var(--push-duration) linear var(--push-delay) both;
+}
+
+::view-transition-group(.page-push-out) {
+	z-index: 1;
+}
+
+/* The incoming image stays still inside its moving box (and skips the default fade-in). */
+::view-transition-new(.page-push-in) {
+	animation: none;
+}
+
+::view-transition-old(.page-push-out) {
+	animation:
+		push-out var(--push-duration) var(--push-ease) var(--push-delay) both,
+		push-dim 1000ms cubic-bezier(0.2, 0.7, 0.3, 1)
+		calc(var(--push-delay) + 40ms) both;
+}
+
+/* Next-project card: the incoming page rises from below the fold. Same clip and
+   one-viewport box as the top push, with the seam on the top edge of the box. */
+@keyframes rise-in-box {
+	from {
+		translate: 0 100vh;
+	}
+	to {
+		translate: 0 0;
+	}
+}
+
+@keyframes rise-in-clip {
+	from,
+	78% {
+		clip-path: inset(1px 0 0 0);
+	}
+	80%,
+	to {
+		clip-path: inset(0);
+	}
+}
+
+/* The page being left shifts up, the direction the card is pushing it. */
+@keyframes rise-out {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		transform: translateY(calc(-100px - 100vh / 9));
+	}
+}
+
+::view-transition-group(.page-rise-in) {
+	z-index: 2;
+	height: 100vh;
+	overflow: clip;
+	animation:
+		rise-in-box var(--push-duration) var(--push-ease) var(--push-delay) both,
+		rise-in-clip var(--push-duration) linear var(--push-delay) both;
+}
+
+::view-transition-group(.page-rise-out) {
+	z-index: 1;
+}
+
+::view-transition-new(.page-rise-in) {
+	animation: none;
+}
+
+::view-transition-old(.page-rise-out) {
+	animation:
+		rise-out var(--push-duration) var(--push-ease) var(--push-delay) both,
+		push-dim 1000ms cubic-bezier(0.2, 0.7, 0.3, 1)
+		calc(var(--push-delay) + 40ms) both;
+}
+
+/* Clicks reach the live page while the transition runs (Next.js view-transitions guide).
+   Scroll must not: a scroll offset is copied onto the group's positioning transform, so the
+   incoming page leaves the viewport while the push timeline keeps running. The lock class is
+   added from `ready` until `finished` (see holdScrollForViewTransitions). */
+::view-transition {
+	pointer-events: none;
+}
+
+html.view-transition-lock {
+	overflow: clip;
+}
+
+/*
+ * During View Transitions the browser composites snapshots; `cursor: none` on live
+ * nodes (e.g. work carousel) no longer applies, so the OS arrow flashes. Hide the
+ * arrow for the whole document until the transition ends.
+ * Level 2: https://www.w3.org/TR/css-view-transitions-2/#selectordef-active-view-transition
+ */
+@supports selector(:root:active-view-transition) {
+	:root:active-view-transition,
+	:root:active-view-transition * {
+		cursor: none !important;
+	}
+}
+
+/* The (0N) counter and the default caption roll up once the incoming page is almost in place. They start
+   when the team page mounts, which is when the transition starts. */
+.team-intro {
+	animation: mask-roll 1000ms var(--roll-ease) calc(var(--push-delay) + 880ms)
+		both;
+}
+
+/* Caption: a member's line rolls up from below when hovered, the others fade out. The default line has its own intro roll. */
+.team-caption-line[data-active="true"]:not(.team-intro) {
+	opacity: 1;
+	animation: mask-roll 900ms var(--roll-ease) both;
+}
+
+.team-caption-line[data-active="true"] {
+	opacity: 1;
+}
+
+.team-caption-line[data-active="false"] {
+	opacity: 0;
+	transition: opacity 280ms ease-out;
+}
+
+/*
+ * Team tile — static (no hover scale): square PFP + name + role underneath, left-aligned to the image
+ * like the reference. Shell is 280×280 so FLIP to `.team-slot` stays 1:1.
+ */
+.team-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 280px;
+	min-width: 0;
+	gap: 10px;
+}
+
+/* Width comes from the grid cell; aspect-ratio sets height. Absolute children do not collapse this. */
+.team-card__portrait-shell {
+	position: relative;
+	flex-shrink: 0;
+	box-sizing: border-box;
+	width: 100%;
+	aspect-ratio: 1;
+	overflow: hidden;
+	border-radius: 10px;
+	background: #171717;
+}
+
+.team-card__portrait {
+	position: absolute;
+	inset: 0;
+}
+
+.team-card__meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
+	width: 100%;
+	padding-inline: 0;
+	text-align: left;
+	pointer-events: none;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+.team-card__name {
+	margin: 0;
+	font-size: clamp(13px, 3.4vw, 18px);
+	line-height: 1.2;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: #fff;
+	text-wrap: balance;
+}
+
+.team-card__role {
+	margin: 0;
+	font-size: clamp(11px, 2.8vw, 14px);
+	line-height: 1.25;
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	text-transform: none;
+	color: #a3a29c;
+	text-wrap: balance;
+}
+
+/* Fill the PageShell content row (h-full chain); flex column so the grid can flex:1 and center. */
+.team-sheet {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+}
+
+/* Fade siblings when one member is open — opacity on the card only. */
+.team-sheet .team-card {
+	transition: opacity 200ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+/*
+ * Columns follow the width. ~160px minimum keeps two people on a phone,
+ * three once they fit, four on a desktop row. Cards themselves cap at 280px.
+ */
+.team-card-row {
+	box-sizing: border-box;
+	flex: 1 1 auto;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+	justify-items: center;
+	align-items: start;
+	align-content: center;
+	gap: clamp(12px, 2.4vw, 32px);
+	row-gap: clamp(16px, 3vw, 36px);
+	width: 100%;
+	max-width: min(1240px, 100%);
+	min-height: 0;
+	margin-inline: auto;
+	padding-block: max(0.75rem, env(safe-area-inset-top, 0px))
+		max(1.25rem, env(safe-area-inset-bottom, 0px));
+	padding-inline: max(12px, env(safe-area-inset-left, 0px))
+		max(12px, env(safe-area-inset-right, 0px));
+}
+
+.team-sheet[data-open="true"] .team-card:not([data-selected="true"]) {
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* The row card hides. Its copy is the one in the column, so the two never sit on top of each other. */
+.team-sheet[data-open="true"] .team-card[data-selected="true"] {
+	visibility: hidden;
+}
+
+.team-slot {
+	position: relative;
+	box-sizing: border-box;
+	width: min(280px, 72vw);
+	aspect-ratio: 1;
+	flex: none;
+	overflow: hidden;
+	transform-origin: center;
+}
+
+/* Starts under the navbar (top is set inline). z-index 1 stays under the navbar at z-10. */
+.team-under {
+	position: absolute;
+	/* Fill the sheet from the top; without `top`, only `bottom` pins the box and it grows upward. */
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 2;
+	/* Side tracks + fixed center column keeps the dialog centered horizontally while scrolling. */
+	display: grid;
+	grid-template-columns: 1fr min(520px, calc(100% - 48px)) 1fr;
+	overflow: auto;
+	overscroll-behavior: contain;
+	padding-bottom: max(64px, env(safe-area-inset-bottom));
+	color: #fff;
+	color-scheme: dark;
+}
+
+.team-under-inner {
+	box-sizing: border-box;
+	grid-column: 2;
+	width: 100%;
+	min-height: 100%;
+}
+
+.team-sheet[data-open="true"] .team-card-row {
+	pointer-events: none;
+}
+
+/* Bottom captions sit on #161616 — keep ink explicit (Skullet/theme can inherit body foreground). */
+.team-rest {
+	color: #fff;
+}
+
+.team-copy [skullet-pane],
+.team-copy [skullet-ghost],
+.team-copy h2,
+.team-copy p {
+	color: inherit;
+}
+
+.team-sheet:not([data-focus="true"]) .team-under {
+	pointer-events: none;
+}
+
+/* The portrait stays opaque and flies back. Only the words leave. */
+.team-sheet:not([data-focus="true"]) .team-copy,
+.team-sheet:not([data-focus="true"]) .team-highlights,
+.team-sheet:not([data-focus="true"]) .team-socials {
+	opacity: 0;
+	transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.team-sheet:not([data-focus="true"]) .team-copy-in {
+	animation: none;
+}
+
+.team-sheet[data-focus="true"] .team-slot {
+	opacity: 1;
+	visibility: visible;
+}
+
+.team-column {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	text-align: center;
+}
+
+.team-highlights,
+.team-socials {
+	width: 100%;
+	max-width: 520px;
+}
+
+@keyframes team-rise {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* The portrait leads. Copy and stills follow, so they don't arrive in the same instant. */
+.team-copy-in {
+	animation: team-rise 200ms cubic-bezier(0.32, 0.72, 0, 1) 140ms both;
+}
+
+.team-social-grid {
+	animation: team-rise 200ms cubic-bezier(0.32, 0.72, 0, 1) 180ms both;
+}
+
+/* Reduced motion: no travel, the pages just swap. */
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(*),
+	::view-transition-new(*),
+	::view-transition-group(*) {
+		animation-duration: 0s !important;
+		animation-delay: 0s !important;
+	}
+
+	.team-intro,
+	.team-caption-line[data-active="true"] {
+		animation-duration: 1ms;
+		animation-delay: 0s;
+	}
+
+	.team-card,
+	.team-sheet .team-card,
+	.team-card__portrait-shell,
+	.team-card__portrait,
+	.team-sheet .team-card__portrait,
+	.team-card__meta,
+	.team-card__name,
+	.team-card__role,
+	.team-slot,
+	.team-under,
+	.team-copy,
+	.team-copy-in,
+	.team-social-grid,
+	.team-caption-line[data-active="false"] {
+		transition-duration: 1ms;
+		animation: none;
+	}
+
+	.home-reviews-stage {
+		transition-duration: 1ms;
+	}
+}
+
+/*
+ * Selected-work carousel, matched to permanent.is section.work.
+ * Tiles are 2400/1780. The 8px gap is the reference's 4px padding on each card.
+ * Edge chrome fades in 350ms with cubic-bezier(0.45, 0.05, 0.25, 1).
+ */
+.work-grid {
+	--work-edge-ease: cubic-bezier(0.45, 0.05, 0.25, 1);
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	position: relative;
+}
+
+.work-grid__list {
+	position: relative;
+	z-index: 0;
+	margin: 0;
+	flex: 1;
+	min-height: 0;
+	height: auto;
+	width: 100%;
+	display: flex;
+	overflow-x: hidden;
+	scrollbar-width: none;
+	user-select: none;
+	cursor: grab;
+	touch-action: pan-y;
+	container-type: size;
+}
+
+.work-grid__list::-webkit-scrollbar {
+	display: none;
+}
+
+.work-grid__list[data-dragging="true"] {
+	cursor: grabbing;
+}
+
+.work-card {
+	flex: none;
+	height: 100%;
+	padding: 0 4px;
+	position: relative;
+	will-change: transform;
+}
+
+.work-card-inner {
+	height: 100%;
+	/* 100cqh is the strip height, so the tile keeps 2400/1780 as the section resizes. */
+	width: calc(100cqh * 2400 / 1780);
+	overflow: hidden;
+	position: relative;
+	background: #f4f4f4;
+}
+
+/* The reveal's panes only wrap absolute art, so they collapse unless they take the card's height. */
+.work-card-inner [skullet-pane],
+.work-card-inner [skullet-loading],
+.work-card-inner [skullet-ghost],
+.project-frame [skullet-pane],
+.project-frame [skullet-loading],
+.project-frame [skullet-ghost] {
+	width: 100%;
+	height: 100%;
+}
+
+.work-card-inner::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	box-shadow: inset 0 0 0 1px #ffffff14;
+	pointer-events: none;
+}
+
+/* Hint is desktop-only; component stays mounted for exit transitions. */
+.work-carousel-hover-hint {
+	display: none;
+}
+
+/* Navbar-like label that follows the pointer over project tiles (desktop / fine pointer). */
+@media (min-width: 761px) and (hover: hover) and (pointer: fine) {
+	.work-carousel-hover-hint {
+		display: block;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 30;
+		max-width: min(22rem, calc(100vw - 2rem));
+		pointer-events: none;
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+		visibility: hidden;
+		/* Position is written as a transform from the follow loop. */
+		transition: visibility 0s linear 220ms;
+	}
+
+	.work-carousel-hover-hint--visible {
+		visibility: visible;
+		transition: visibility 0s linear 0s;
+	}
+
+	/* Black pill "unfolds" from the pointer (origin left) with a slight skew; exit snaps smaller first.
+	   Hotspot offset lives on the outer .work-carousel-hover-hint (inline translate) so the pill tracks the cursor. */
+	.work-carousel-hover-hint__shell {
+		display: inline-block;
+		padding: 0.35rem 0.5rem;
+		border-radius: 0.375rem;
+		background: #000;
+		transform-origin: left center;
+		opacity: 0;
+		transform: translateX(-12px) scaleX(0.68) scaleY(0.88) skewX(-5deg);
+		transition:
+			opacity 120ms cubic-bezier(0.45, 0, 1, 0.65),
+			transform 120ms cubic-bezier(0.45, 0, 1, 0.65);
+		will-change: transform, opacity;
+	}
+
+	.work-carousel-hover-hint--visible .work-carousel-hover-hint__shell {
+		opacity: 1;
+		transform: scaleX(1) scaleY(1) skewX(0deg);
+		transition:
+			opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+			transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.work-carousel-hover-hint__label {
+		display: block;
+		color: #fff;
+		font-size: 0.8125rem;
+		line-height: 1.15;
+		font-weight: 400;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+		opacity: 0;
+		transform: translateY(7px);
+		transition:
+			opacity 100ms cubic-bezier(0.45, 0, 1, 0.65),
+			transform 100ms cubic-bezier(0.45, 0, 1, 0.65);
+	}
+
+	.work-carousel-hover-hint--visible .work-carousel-hover-hint__label {
+		opacity: 1;
+		transform: translateY(0);
+		transition:
+			opacity 180ms cubic-bezier(0.32, 0.72, 0, 1) 55ms,
+			transform 200ms cubic-bezier(0.32, 0.72, 0, 1) 50ms;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.work-carousel-hover-hint {
+			transition: none;
+		}
+
+		.work-carousel-hover-hint__shell,
+		.work-carousel-hover-hint--visible .work-carousel-hover-hint__shell,
+		.work-carousel-hover-hint__label,
+		.work-carousel-hover-hint--visible .work-carousel-hover-hint__label {
+			transition: none;
+			transform: none;
+			opacity: 1;
+		}
+
+		.work-carousel-hover-hint:not(.work-carousel-hover-hint--visible)
+			.work-carousel-hover-hint__shell,
+		.work-carousel-hover-hint:not(.work-carousel-hover-hint--visible)
+			.work-carousel-hover-hint__label {
+			opacity: 0;
+		}
+
+		.work-carousel-hover-hint:not(.work-carousel-hover-hint--visible) {
+			visibility: hidden;
+		}
+	}
+}
+
+/*
+ * Home project index under the carousel — Aesso-style preview stacks,
+ * Permanent-style vertical rhythm (87px section gap comes from the page).
+ */
+.home-intro-text {
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+/* Home — centered reviews (quote-wide, attribution compact, ref-style proportions). */
+.home-reviews {
+	color: var(--home-ink);
+	box-sizing: border-box;
+	max-width: 52rem;
+	margin-inline: auto;
+	padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+	padding-block: clamp(2rem, 5vw, 3.5rem);
+	/* Extra air below the post-rail grid; stacks with the page column gap. */
+	margin-top: clamp(96px, 14vw, 200px);
+}
+
+/* Single stage — opacity crossfade between quotes (see HomeReviewsSection). */
+.home-reviews-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+	min-height: min(20rem, 48vh);
+	transition: opacity 700ms cubic-bezier(0.45, 0.05, 0.25, 1);
+}
+
+.home-reviews-stage[data-visible="false"] {
+	opacity: 0;
+}
+
+.home-review-quote {
+	margin: 0;
+	width: 100%;
+	max-width: 42rem;
+	font-size: clamp(20px, 1.85vw, 27px);
+	line-height: 1.38;
+	font-weight: 400;
+	letter-spacing: -0.028em;
+	text-wrap: pretty;
+}
+
+.home-review-quote p {
+	margin: 0;
+}
+
+/* Quotes live in the copy (curly “ ”), not pseudo-elements — avoids duplicate marks. */
+
+/* Narrower band under the quote (ref: identity sits tighter than the pull quote). */
+.home-review-attribution {
+	margin: clamp(28px, 4vw, 40px) 0 0;
+	max-width: 20rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	font-style: normal;
+}
+
+.home-review-attribution-name {
+	font-size: 14px;
+	line-height: 1.25;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--home-ink);
+	font-style: normal;
+}
+
+.home-review-attribution-meta {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.35;
+	font-weight: 500;
+	text-transform: none;
+	letter-spacing: 0.02em;
+}
+
+.home-review-attribution-role-at {
+	color: var(--home-ink-muted);
+}
+
+/* Full ink for the client name (not washed out with the role line). */
+.home-review-attribution-brand {
+	color: var(--home-ink);
+	font-weight: 600;
+}
+
+.home-review-attribution-role-only {
+	color: var(--home-ink-muted);
+	font-weight: 500;
+}
+
+.home-clients {
+	color: var(--home-ink);
+}
+
+.home-clients-label {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.2;
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--home-ink-muted);
+}
+
+.home-clients-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+}
+
+.home-client {
+	margin: 0;
+	max-width: 36rem;
+	font-size: clamp(20px, 2vw, 24px);
+	line-height: 1.35;
+	font-weight: 400;
+	letter-spacing: -0.03em;
+	text-wrap: pretty;
+}
+
+.home-client-line {
+	color: var(--home-ink-muted);
+}
+
+.home-work-index {
+	width: 100%;
+	padding-inline: 40px;
+	padding-bottom: 0;
+}
+
+/*
+ * Band under the work rail — no outer “card”; headline + message, then four portrait tiles.
+ */
+.home-post-rail {
+	color: var(--home-ink);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* Extra air below the work carousel; stacks with the page column gap. */
+	margin-top: clamp(72px, 10vw, 140px);
+}
+
+.home-post-rail-intro {
+	width: 100%;
+	max-width: 40rem;
+	margin: 0 auto clamp(28px, 4vw, 40px);
+	text-align: center;
+}
+
+.home-post-rail-heading {
+	margin: 0 0 clamp(14px, 2.2vw, 20px);
+	font-size: clamp(22px, 1.9vw + 10px, 32px);
+	line-height: 1.18;
+	font-weight: 500;
+	letter-spacing: -0.03em;
+	text-wrap: balance;
+	color: var(--home-ink);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+.home-post-rail-grid {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	/*
+	 * Columns match card width (not 50vw). Otherwise max-width cards center inside huge
+	 * tracks and the horizontal gap *reads* as a canyon on wide screens.
+	 */
+	grid-template-columns: repeat(2, minmax(0, 22rem));
+	justify-content: center;
+	column-gap: clamp(6px, 0.85vw, 10px);
+	row-gap: clamp(14px, 2.2vw, 20px);
+	align-items: start;
+	justify-items: stretch;
+}
+
+.home-post-rail-card {
+	margin: 0;
+	min-width: 0;
+	width: 100%;
+	display: flex;
+	justify-content: stretch;
+}
+
+.home-post-rail-card-inner {
+	width: 100%;
+	/* Portrait tile: taller than wide (reference-style vertical cards). */
+	aspect-ratio: 3 / 4;
+	min-height: 17.5rem;
+	max-height: 26rem;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: space-between;
+	border-radius: 14px;
+	/* No stroke: tone block separates tiles from the white page (request: #F8F7F7). */
+	background: #f8f7f7;
+	padding: clamp(18px, 2.5vw, 24px);
+	gap: clamp(12px, 2vw, 18px);
+	text-align: left;
+}
+
+.home-post-rail-card-index {
+	margin: 0;
+	font-size: clamp(15px, 1.35vw, 17px);
+	line-height: 1.25;
+	font-weight: 500;
+	letter-spacing: -0.02em;
+	color: var(--home-ink);
+	font-variant-numeric: tabular-nums;
+}
+
+.home-post-rail-card-num {
+	color: var(--home-ink-muted);
+	font-weight: 500;
+}
+
+.home-post-rail-card-title {
+	font-weight: 600;
+}
+
+.home-post-rail-card-figure {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	align-items: center;
+	justify-content: center;
+	color: var(--home-ink);
+	opacity: 0.98;
+}
+
+.home-post-rail-card-glyph {
+	display: block;
+	width: min(140px, 76%);
+	height: auto;
+	aspect-ratio: 1;
+}
+
+.home-post-rail-card-tagline {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.45;
+	font-weight: 400;
+	letter-spacing: -0.012em;
+	text-wrap: pretty;
+	color: var(--home-ink-muted);
+}
+
+.home-post-rail-message {
+	margin: 0;
+	max-width: none;
+	text-align: center;
+	font-size: clamp(17px, 1.5vw, 20px);
+	line-height: 1.5;
+	font-weight: 400;
+	letter-spacing: -0.018em;
+	text-wrap: pretty;
+	color: var(--home-ink-muted);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+/* Matches `.project-page` inset so close + footer align with case studies. */
+.home-page-bottom {
+	width: 100%;
+	padding-inline: 40px;
+	/* PageShell stays white while `body` may use light `--foreground` in dark mode. */
+	color: var(--home-ink);
+}
+
+.home-work-index-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 128px;
+}
+
+.home-work-index-item {
+	margin: 0;
+}
+
+.home-project-previews {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.home-project-hero-link,
+.home-project-pair-link {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.home-project-hero-frame,
+.home-project-pair-frame {
+	position: relative;
+	overflow: hidden;
+	background: #f4f4f4;
+}
+
+.home-project-hero-frame {
+	aspect-ratio: 2457 / 1382;
+}
+
+.home-project-pair {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.home-project-pair-frame {
+	aspect-ratio: 1221 / 1526;
+}
+
+.home-project-previews [skullet-pane],
+.home-project-previews [skullet-loading],
+.home-project-previews [skullet-ghost],
+.team-card__portrait [skullet-pane],
+.team-card__portrait [skullet-loading],
+.team-card__portrait [skullet-ghost],
+.team-slot [skullet-pane],
+.team-slot [skullet-loading],
+.team-slot [skullet-ghost] {
+	width: 100%;
+	height: 100%;
+}
+
+.home-project-copy {
+	margin-top: 48px;
+	max-width: 40rem;
+}
+
+.home-project-title {
+	margin: 0 0 16px;
+	font-size: clamp(22px, 2.5vw, 28px);
+	line-height: 1.2;
+	letter-spacing: -0.03em;
+	font-weight: 500;
+	color: var(--home-ink);
+}
+
+/* Skullet text bones can wash out title color until reveal — keep ink explicit. */
+.home-project-copy [skullet-pane],
+.home-project-copy [skullet-ghost],
+.home-project-title a {
+	color: var(--home-ink);
+}
+
+.home-project-title a {
+	color: inherit;
+	text-decoration: none;
+	/* Opacity / color transitions on hover — keep paint crisp. */
+	will-change: color;
+}
+
+.home-project-title a:focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px #fff,
+		0 0 0 4px var(--home-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.home-project-title a:hover {
+		color: var(--home-ink-muted);
+	}
+}
+
+.home-project-lede {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.5;
+	font-weight: 400;
+	color: var(--home-ink-muted);
+	text-wrap: pretty;
+	max-width: 65ch;
+}
+
+@media (max-width: 760px) {
+	.home-post-rail {
+		margin-top: clamp(48px, 8vw, 88px);
+	}
+
+	.home-post-rail-intro {
+		max-width: 100%;
+	}
+
+	.home-post-rail-grid {
+		grid-template-columns: minmax(0, 20rem);
+		justify-content: center;
+	}
+
+	.home-post-rail-card {
+		margin-inline: auto;
+		max-width: 20rem;
+	}
+
+	.home-post-rail-card-inner {
+		padding: 20px 18px;
+		aspect-ratio: auto;
+		min-height: 18rem;
+		max-height: none;
+	}
+
+	.home-work-index {
+		padding-inline: 16px;
+	}
+
+	.home-page-bottom {
+		padding-inline: 16px;
+	}
+
+	.home-work-index-list {
+		gap: 96px;
+	}
+
+	.home-project-pair {
+		grid-template-columns: 1fr;
+	}
+}
+
+.work-edge-nav {
+	position: absolute;
+	inset: 0;
+	overflow: clip;
+	pointer-events: none;
+}
+
+/* The reference page is inset 12px and the strip bleeds back to the viewport edge. */
+.work-grid--bleed .work-grid__list {
+	width: calc(100% + 24px);
+	margin-inline: -12px;
+}
+
+.work-grid--bleed .work-edge-nav {
+	inset: 0 -12px;
+}
+
+.work-edge-blur {
+	position: absolute;
+	inset-block: 0;
+	width: calc(min(320px, 25%) + 2px);
+	pointer-events: none;
+}
+
+.work-edge-blur--prev {
+	left: -2px;
+	--blur-direction: to left;
+}
+
+.work-edge-blur--next {
+	right: -2px;
+	--blur-direction: to right;
+}
+
+.work-edge-blur span {
+	position: absolute;
+	inset: 0;
+	backdrop-filter: blur(var(--edge-blur));
+	-webkit-backdrop-filter: blur(var(--edge-blur));
+	mask-image: linear-gradient(
+		var(--blur-direction),
+		transparent var(--blur-start),
+		#000 var(--blur-end)
+	);
+	-webkit-mask-image: linear-gradient(
+		var(--blur-direction),
+		transparent var(--blur-start),
+		#000 var(--blur-end)
+	);
+	opacity: 0;
+	transition: opacity 350ms var(--work-edge-ease);
+}
+
+.work-edge-arrow {
+	position: absolute;
+	z-index: 1;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 40px;
+	height: 40px;
+	border-radius: 1000px;
+	background: #1414148c;
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	border: none;
+	cursor: pointer;
+	color: #fcfcfc;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	pointer-events: auto;
+	/* Hover animates transform, filter, opacity, background — promote before interaction. */
+	will-change: transform, filter, opacity, background;
+	transition:
+		opacity 350ms var(--work-edge-ease),
+		filter 350ms var(--work-edge-ease),
+		transform 150ms ease,
+		background 150ms ease;
+}
+
+.work-edge-arrow[data-work-prev] {
+	left: 24px;
+}
+
+.work-edge-arrow[data-work-next] {
+	right: 24px;
+}
+
+@media (hover: hover) {
+	.work-edge-arrow:hover {
+		background: #141414bf;
+	}
+}
+
+.work-edge-arrow:active {
+	transform: translateY(-50%) scale(0.96);
+}
+
+.work-edge-arrow:focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px #fff,
+		0 0 0 4px #000;
+	transition: none;
+}
+
+@media (min-width: 761px) and (hover: hover) and (pointer: fine) {
+	.work-edge-arrow {
+		opacity: 0;
+		filter: blur(12px);
+		pointer-events: none;
+	}
+
+	.work-grid[data-hover-edge="prev"] [data-work-prev],
+	.work-grid[data-hover-edge="next"] [data-work-next],
+	.work-edge-arrow:focus-visible {
+		opacity: 1;
+		filter: blur(0);
+		pointer-events: auto;
+	}
+
+	.work-grid[data-hover-edge="prev"] .work-edge-blur--prev span,
+	.work-grid[data-hover-edge="next"] .work-edge-blur--next span,
+	.work-edge-nav:has([data-work-prev]:focus-visible) .work-edge-blur--prev span,
+	.work-edge-nav:has([data-work-next]:focus-visible)
+		.work-edge-blur--next
+		span {
+		opacity: 1;
+	}
+}
+
+/* Touch and narrow viewports: a native scroller, one copy of each tile. Slide with the finger — no arrows. */
+@media (max-width: 760px), (hover: none), (pointer: coarse) {
+	.work-grid,
+	.work-grid__list,
+	.work-card {
+		height: auto;
+	}
+
+	/* size containment would ignore the tiles and collapse this list to 0 height.
+	   pan-x lets the finger scroll this strip; the base rule is pan-y, which swallows the swipe. */
+	.work-grid__list {
+		container-type: inline-size;
+		overflow-x: auto;
+		overflow-y: visible;
+		overscroll-behavior-x: contain;
+		-webkit-overflow-scrolling: touch;
+		touch-action: pan-x pan-y;
+		cursor: auto;
+		width: 100%;
+		margin-inline: 0;
+	}
+
+	.work-edge-nav {
+		display: none;
+	}
+
+	.work-card[data-copy]:not([data-copy="0"]):not([data-copy="1"]) {
+		display: none;
+	}
+
+	.work-edge-blur {
+		display: none;
+	}
+
+	.work-card-inner {
+		height: auto;
+		width: min(92vw, 720px);
+		aspect-ratio: 2400 / 1780;
+	}
+
+	.work-edge-arrow {
+		top: auto;
+		bottom: 0;
+		transform: none;
+		width: 32px;
+		height: 32px;
+		background: #f4f4f4;
+		backdrop-filter: none;
+		-webkit-backdrop-filter: none;
+		color: #141414cc;
+	}
+
+	.work-edge-arrow[data-work-prev] {
+		left: auto;
+		right: 52px;
+	}
+
+	.work-edge-arrow[data-work-next] {
+		right: 12px;
+	}
+
+	.work-edge-arrow:active {
+		transform: scale(0.96);
+	}
+
+	.work-edge-arrow:disabled {
+		opacity: 0.35;
+		cursor: default;
+	}
+
+	.work-edge-arrow::before {
+		content: "";
+		position: absolute;
+		inset: -6px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.work-edge-arrow,
+	.work-edge-blur span {
+		transition: none;
+	}
+}
+
+/*
+ * Project case study — centred intro + single media column (8px line gap; pairs are two 960/1080 tiles).
+ * Column width matches gallery rails so headline and stills share one vertical spine (cf. thoseguys.studio case flow).
+ */
+.project-page {
+	/* One centred column for words, gallery, review, and close (narrower than full viewport). */
+	--project-rail: min(960px, calc(100vw - 80px));
+	/* Shared by the review card and every media frame so the stack uses one corner. */
+	--project-card-radius: 14px;
+	padding-inline: 40px;
+	color: #141414;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+/*
+ * Motion RevealSection wrappers are full-width flex items (`w-full`), so they broke
+ * `align-items: center` centering for inner `.project-words` / `.project-media`. Constrain
+ * the wrapper to the same rail + auto margins so the stack stays centered on wide viewports.
+ */
+.project-page .project-reveal-rail {
+	/* Same width cap as inner rails; flex item stays narrow so `align-items: center` can center it. */
+	width: min(100%, var(--project-rail));
+	margin-inline: auto;
+	box-sizing: border-box;
+}
+
+.project-words {
+	/* Shares `--project-rail` with media + review so the spine reads as a single stack. */
+	width: 100%;
+	max-width: var(--project-rail);
+	margin-inline: 0;
+	padding-top: 200px;
+	padding-bottom: 96px;
+	text-align: center;
+	color: #141414;
+}
+
+/* Headline + muted intro (Office Commun case__words, without long essay rows). */
+.project-hero {
+	padding-top: 0;
+	padding-bottom: 0;
+	text-align: inherit;
+}
+
+.project-hero h1 {
+	margin: 0 auto;
+	max-width: 22em;
+	font-size: clamp(28px, 2.4vw, 34px);
+	line-height: 1.25;
+	letter-spacing: -0.03em;
+	font-weight: 400;
+	text-wrap: pretty;
+	text-box-edge: cap alphabetic;
+	text-box-trim: trim-both;
+	font-variation-settings:
+		"MONO" 0,
+		"DRKM" 0;
+}
+
+.project-words-summary {
+	max-width: 36rem;
+	margin: 20px auto 0;
+	font-size: 16px;
+	line-height: 1.4;
+	font-weight: 400;
+	color: rgb(20 20 20 / 0.55);
+	text-wrap: pretty;
+}
+
+.project-media {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+	max-width: var(--project-rail);
+	margin-inline: 0;
+}
+
+/* Optional testimonial — same copy as home when `brand` matches the case study. */
+.project-page-review {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--project-rail);
+	margin: clamp(72px, 10vw, 112px) 0 0;
+	padding-inline: 0;
+	text-align: center;
+	color: #141414;
+}
+
+/* Matches `.home-post-rail-card-inner`: same tone + radius so testimonial reads as a home tile on the case page. */
+.project-page-review-card {
+	background: #f8f7f7;
+	border-radius: var(--project-card-radius);
+	color: var(--home-ink);
+	/* Strong vertical padding; quote stays narrower than the card (see `.project-page-review-quote`). */
+	padding-block: clamp(56px, 8.5vw, 120px);
+	padding-inline: clamp(28px, 4vw, 48px);
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.project-page-review-quote {
+	margin: 0 auto;
+	/* Narrower measure than the card shell so lines don’t span the full 960px rail. */
+	width: 100%;
+	max-width: min(34rem, 90%);
+	font-size: clamp(18px, 1.65vw, 24px);
+	line-height: 1.38;
+	font-weight: 400;
+	letter-spacing: -0.028em;
+	text-wrap: pretty;
+}
+
+.project-page-review-quote p {
+	margin: 0;
+}
+
+.project-page-review-attribution {
+	margin: clamp(20px, 3vw, 28px) 0 0;
+	max-width: 20rem;
+	margin-inline: auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	font-style: normal;
+}
+
+.project-page-review-name {
+	font-size: 14px;
+	line-height: 1.25;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	color: var(--home-ink);
+	font-style: normal;
+}
+
+.project-page-review-meta {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.35;
+	font-weight: 500;
+	text-transform: none;
+	letter-spacing: 0.02em;
+}
+
+.project-page-review-role-at {
+	color: var(--home-ink-muted);
+}
+
+.project-page-review-brand {
+	color: var(--home-ink);
+	font-weight: 600;
+}
+
+.project-page-review-role-only {
+	color: var(--home-ink-muted);
+	font-weight: 500;
+}
+
+.project-line {
+	display: flex;
+	width: 100%;
+}
+
+.project-line--pair {
+	gap: 8px;
+}
+
+.project-frame {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	margin: 0;
+	background: #f4f4f4;
+	/* Same corner as `.project-page-review-card`. Some stills are sharp exports, some
+	   already curve; clipping the frame makes every card match the review. */
+	border-radius: var(--project-card-radius);
+}
+
+.project-frame img {
+	border-radius: var(--project-card-radius);
+}
+
+.project-frame--full {
+	aspect-ratio: 16 / 9;
+}
+
+.project-line--pair .project-frame--pair {
+	flex: 1 1 0;
+	min-width: 0;
+	aspect-ratio: 960 / 1080;
+}
+
+.project-close {
+	width: 100%;
+	max-width: var(--project-rail);
+	margin-top: 128px;
+	margin-inline: 0;
+	padding-block: 40px;
+	display: flex;
+	justify-content: center;
+	/* Always studio ink on the white page shell (not theme `foreground`). */
+	color: #141414;
+}
+
+/*
+ * Case study pages only: when `ProjectNextDock` opens (fixed, grows from bottom),
+ * extra bottom padding keeps the close copy and contact pills above the black sheet
+ * without reserving blank space on the whole page (modifier vs. `.project-page` padding).
+ */
+.project-close--with-next-dock {
+	padding-bottom: max(
+		40px,
+		clamp(14rem, 38vh, 26rem),
+		calc(env(safe-area-inset-bottom, 0px) + 14rem)
+	);
+}
+
+/* Skullet text bones inherit theme foreground until reveal — keep ink explicit. */
+.project-close [skullet-pane],
+.project-close [skullet-ghost],
+.project-close h2,
+.project-close p {
+	color: inherit;
+}
+
+.project-close-grid {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	width: 100%;
+	text-align: center;
+}
+
+.project-close h2 {
+	margin: 0;
+	max-width: 18em;
+	font-size: 24px;
+	line-height: 1.3;
+	letter-spacing: -0.03em;
+	font-weight: 400;
+}
+
+.project-close p {
+	max-width: 512px;
+	margin: 0;
+	font-size: 14px;
+	line-height: 18.2px;
+	font-weight: 400;
+	text-wrap: pretty;
+}
+
+/* In-flow marker at end of case study — IntersectionObserver root viewport. */
+.project-next-sentinel {
+	height: 1px;
+	margin: 0;
+}
+
+/*
+ * Fixed next-project dock: opens when sentinel intersects (or scroll math says bottom).
+ * Motion = translate on the panel for smooth motion.
+ */
+.project-next-dock {
+	--project-next-open-ease: cubic-bezier(0.32, 0.72, 0, 1);
+	--project-next-close-ease: cubic-bezier(0.4, 0, 0.2, 1);
+	position: fixed;
+	inset: auto 0 0;
+	z-index: 20;
+	width: 100%;
+	max-width: 100vw;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	align-items: stretch;
+	padding: 0;
+	pointer-events: none;
+	/* Avoid subpixel gap under the sheet on some GPUs. */
+	transform: translateZ(0);
+}
+
+.project-next-dock--open {
+	pointer-events: auto;
+}
+
+.project-next-dock__sheet {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 0 1.25rem;
+}
+
+.project-next-dock__panel {
+	container-type: inline-size;
+	box-sizing: border-box;
+	/* Wide enough for two-word brand lines (e.g. “Chili Riders”) without clipping. */
+	width: min(58ch, calc(100vw - 2.5rem));
+	max-width: 100%;
+	flex-shrink: 0;
+	will-change: transform;
+	cursor: pointer;
+	translate: 0 102%;
+	opacity: 0;
+	transform-origin: bottom center;
+	transition:
+		translate 420ms var(--project-next-close-ease),
+		opacity 220ms var(--project-next-close-ease);
+	/* Extra bottom padding: home indicator / safe area — keeps ink off the physical bottom edge. */
+	padding-bottom: max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.25rem));
+	/* Rounded top only — bottom edge is square and flush with the viewport. */
+	border-radius: 0.625rem 0.625rem 0 0;
+}
+
+/*
+ * Brand fills the card horizontally: size tracks the *panel* content box (cqw), not the sheet.
+ * Short words like "OASIS" need a large cq share + high max so type scales with the black card.
+ */
+.project-next-dock__brand {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	text-wrap: balance;
+	/* Slightly softer cqw cap so long two-line names stay inside the widened card. */
+	font-size: clamp(2.75rem, 26cqw, 10rem);
+	line-height: 0.92;
+	font-weight: 500;
+	letter-spacing: -0.05em;
+}
+
+.project-next-dock__hint {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	text-wrap: balance;
+}
+
+.project-next-dock--open .project-next-dock__panel {
+	translate: 0 0;
+	opacity: 1;
+	transition-duration: 480ms, 320ms;
+	transition-timing-function:
+		var(--project-next-open-ease), var(--project-next-open-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.project-next-dock__panel,
+	.project-next-dock--open .project-next-dock__panel {
+		transition: none;
+	}
+
+	.project-next-dock:not(.project-next-dock--open) {
+		visibility: hidden;
+	}
+
+	.project-next-dock--open .project-next-dock__panel {
+		translate: 0 0;
+		opacity: 1;
+	}
+}
+
+.project-footer {
+	position: relative;
+	margin-top: 128px;
+	/* Break out of the page inset so the clock and wordmark can run to the edges. */
+	margin-inline: -40px;
+	padding-bottom: max(2.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+	color: #141414;
+	text-transform: uppercase;
+}
+
+.project-footer-bar {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	padding-inline: 40px;
+	font-size: 14px;
+	line-height: 18.2px;
+	font-weight: 400;
+}
+
+.project-footer-bar p,
+.project-footer-bar nav {
+	margin: 0;
+}
+
+.project-footer-bar nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 16px 48px;
+	font-weight: 500;
+}
+
+/* Full-width studio wordmark from the previous site, under the clock. */
+.project-footer-mark {
+	display: block;
+	width: calc(100% - 80px);
+	height: auto;
+	margin: 12px auto 0;
+}
+
+.project-footer a {
+	color: inherit;
+	text-decoration: none;
+	will-change: color;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.project-footer a:hover {
+		color: #14141499;
+	}
+}
+
+.project-footer a:focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px #fff,
+		0 0 0 4px #141414;
+}
+
+@media (max-width: 760px) {
+	.project-page {
+		padding-inline: 16px;
+		--project-rail: min(960px, calc(100vw - 32px));
+	}
+
+	.project-words {
+		padding-top: 200px;
+		padding-bottom: 64px;
+	}
+
+	.project-close {
+		margin-top: 64px;
+	}
+
+	.project-close--with-next-dock {
+		padding-bottom: max(
+			40px,
+			clamp(14rem, 44vh, 22rem),
+			calc(env(safe-area-inset-bottom, 0px) + 12rem)
+		);
+	}
+
+	.project-footer {
+		margin-top: 64px;
+		margin-inline: -16px;
+	}
+
+	.project-footer-bar {
+		padding-inline: 16px;
+	}
+
+	.project-footer-mark {
+		width: calc(100% - 32px);
+	}
+}
+
+/*
+ * Navbar contact panel. The box grows from the bar into the panel, then the content settles in.
+ * Opening uses a strong ease-out so the click feels answered at once; closing is ~30% shorter
+ * and the content leaves first, so the box never collapses over visible text.
+ */
+.navbar-box {
+	--navbar-open-ease: cubic-bezier(0.32, 0.72, 0, 1);
+	--navbar-close-ease: cubic-bezier(0.4, 0, 0.2, 1);
+	transition: border-radius 220ms var(--navbar-close-ease);
+}
+
+.navbar-box[data-state="open"] {
+	transition-duration: 320ms;
+	transition-timing-function: var(--navbar-open-ease);
+}
+
+/* grid-template-rows 0fr -> 1fr animates to the content's real height without measuring it. */
+.navbar-panel {
+	display: grid;
+	grid-template-rows: 0fr;
+	width: 0;
+	transition:
+		grid-template-rows 220ms var(--navbar-close-ease),
+		width 220ms var(--navbar-close-ease);
+}
+
+.navbar-box[data-state="open"] .navbar-panel {
+	grid-template-rows: 1fr;
+	width: 295px;
+	transition-duration: 320ms;
+	transition-timing-function: var(--navbar-open-ease);
+}
+
+/* Each block rises a few px into place; --i sets its order, --rise lets the large wordmark travel further. */
+.navbar-reveal {
+	opacity: 0;
+	translate: 0 var(--rise, 6px);
+	transition:
+		opacity 120ms ease-out,
+		translate 120ms ease-out;
+}
+
+.navbar-box[data-state="open"] .navbar-reveal {
+	opacity: 1;
+	translate: 0 0;
+	transition-duration: 260ms;
+	transition-timing-function: var(--navbar-open-ease);
+	transition-delay: calc(90ms + var(--i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.navbar-box,
+	.navbar-box[data-state="open"],
+	.navbar-panel,
+	.navbar-box[data-state="open"] .navbar-panel,
+	.navbar-reveal,
+	.navbar-box[data-state="open"] .navbar-reveal {
+		transition: none;
+	}
+}
+
+/* Welcome curtain: the word fades in, then the white panel slides off after the hold. */
+@keyframes preloader-benvenuto-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.preloader-benvenuto-fade-in {
+	animation: preloader-benvenuto-fade-in 0.65s cubic-bezier(0.22, 1, 0.36, 1)
+		0.2s forwards;
+	opacity: 0;
+}
+
+@keyframes preloader-curtain-exit {
+	from {
+		transform: translateY(0);
+	}
+	to {
+		transform: translateY(-100%);
+	}
+}
+
+.preloader-curtain-exit {
+	animation: preloader-curtain-exit 1s cubic-bezier(0.785, 0.135, 0.15, 0.86)
+		forwards;
+	will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.preloader-benvenuto-fade-in,
+	.preloader-curtain-exit {
+		animation: none;
+		opacity: 1;
+		transform: none;
+	}
+}

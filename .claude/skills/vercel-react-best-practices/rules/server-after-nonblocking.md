@@ -1,4 +1,5 @@
 ---
+
 title: Use after() for Non-Blocking Operations
 impact: MEDIUM
 impactDescription: faster response times
@@ -15,17 +16,17 @@ Use Next.js's `after()` to schedule work that should execute after a response is
 import { logUserAction } from "@/app/utils";
 
 export async function POST(request: Request) {
-  // Perform mutation
-  await updateDatabase(request);
+	// Perform mutation
+	await updateDatabase(request);
 
-  // Logging blocks the response
-  const userAgent = request.headers.get("user-agent") || "unknown";
-  await logUserAction({ userAgent });
+	// Logging blocks the response
+	const userAgent = request.headers.get("user-agent") || "unknown";
+	await logUserAction({ userAgent });
 
-  return new Response(JSON.stringify({ status: "success" }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+	return new Response(JSON.stringify({ status: "success" }), {
+		status: 200,
+		headers: { "Content-Type": "application/json" },
+	});
 }
 ```
 
@@ -38,21 +39,22 @@ import { after } from "next/server";
 import { logUserAction } from "@/app/utils";
 
 export async function POST(request: Request) {
-  // Perform mutation
-  await updateDatabase(request);
+	// Perform mutation
+	await updateDatabase(request);
 
-  // Log after response is sent
-  after(async () => {
-    const userAgent = (await headers()).get("user-agent") || "unknown";
-    const sessionCookie = (await cookies()).get("session-id")?.value || "anonymous";
+	// Log after response is sent
+	after(async () => {
+		const userAgent = (await headers()).get("user-agent") || "unknown";
+		const sessionCookie =
+			(await cookies()).get("session-id")?.value || "anonymous";
 
-    logUserAction({ sessionCookie, userAgent });
-  });
+		logUserAction({ sessionCookie, userAgent });
+	});
 
-  return new Response(JSON.stringify({ status: "success" }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+	return new Response(JSON.stringify({ status: "success" }), {
+		status: 200,
+		headers: { "Content-Type": "application/json" },
+	});
 }
 ```
 

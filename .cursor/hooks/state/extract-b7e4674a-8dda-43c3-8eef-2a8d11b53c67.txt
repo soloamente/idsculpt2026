@@ -1,0 +1,24 @@
+===== line 1 =====
+\n/reanimate the \"selected product work\" section carousel in https://permanent.is/ home page, and replace it with our current work gallery carousel\n
+
+===== line 81 =====
+Briefly inform the user about the task result and perform any follow-up actions (if needed). If there's no follow-ups needed, don't explicitly say that.
+
+===== line 83 =====
+\n## Page Feedback: /team\n**Viewport:** 1801Ã—956\n\n### 1. <TeamSheet> button [Team Member Two, Design]\n**Location:** section > .pointer-events-none > .@container-size > .absolute\n**React:** <TeamSheet>\n**Feedback:** when clicking on a team member, i want their image to focus and get on the foreground, so get bigger and go to the center. the other team member will disappear and under the team member selected we will be able to see the work that user has made for the team /emil-product-thinking\n
+
+===== line 85 =====
+\n## Page Feedback: /team\n**Viewport:** 1801Ã—956\n\n### 1. <TeamSheet> button [Team Member Two, Design]\n**Location:** section > .pointer-events-none > .@container-size > .absolute\n**React:** <TeamSheet>\n**Feedback:** when clicking on a team member, i want their image to focus and get on the foreground, so get bigger and go to the center. the other team member will disappear and under the team member selected we will be able to see the work that user has made for the team /emil-product-thinking\n
+
+===== line 87 =====
+\nA visitor goes to the team page and can see the members but i want them to also. they instintectevily hover the team member\n
+
+===== line 91 =====
+\nA visitor clicks Team Member Two, nothing happens, so they leave /team and scroll the home gallery hoping the Chili Riders tile is theirs.\n
+
+===== line 94 =====
+\nthere is no current team member work, but just studio work, so people cant know much about the team members, they can just see their role or name no more info\n
+
+===== line 97 =====
+\nRun the `continual-learning` skill now. Use the `agents-memory-updater` subagent for the full memory update flow. Use incremental transcript processing with index file `C:\\Users\\adgv\\Documents\\Projects\\idsculpt26\\.cursor\\hooks\\state\\continual-learning-index.json`: only consider transcripts not in the index or transcripts whose mtime is newer than indexed mtime. Have the subagent refresh index mtimes, remove entries for deleted transcripts, and update `AGENTS.md` only for high-signal recurring user corrections and durable workspace facts. Exclude one-off/transient details and secrets. If no meaningful updates exist, respond exactly: No high-signal memory updates.\n
+

@@ -1,6 +1,6 @@
 {
-  "extends": "@idsculpt26/config/tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": true
-  }
+	"extends": "@idsculpt26/config/tsconfig.base.json",
+	"compilerOptions": {
+		"noEmit": true
+	}
 }

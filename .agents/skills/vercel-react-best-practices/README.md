@@ -34,6 +34,7 @@ A structured repository for creating and maintaining React Best Practices optimi
    ```
 
 4. Extract test cases:
+
    ```bash
    pnpm extract-tests
    ```
@@ -60,6 +61,7 @@ Each rule file should follow this structure:
 
 ````markdown
 ---
+
 title: Rule Title Here
 impact: MEDIUM
 impactDescription: Optional description

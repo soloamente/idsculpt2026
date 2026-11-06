@@ -1,40 +1,35 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import Areal from "next/font/local";
 
 import "../index.css";
-import Header from "@/components/header";
 import Providers from "@/components/providers";
+import { SitePreloader } from "@/components/site-preloader";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const areal = Areal({
+	src: "../../public/fonts/ABCArealSuperfamilyVariable.woff2",
+	variable: "--font-areal",
+	weight: "100 900",
+	style: "normal",
 });
 
 export const metadata: Metadata = {
-  title: "idsculpt26",
-  description: "idsculpt26",
+	title: "Identity Sculpt",
+	description:
+		"Identity Sculpt is a design studio that creates unique and memorable brand identities for businesses and organizations.",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
-            <Header />
-            {children}
-          </div>
-        </Providers>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en" suppressHydrationWarning>
+			<body className={`${areal.variable} antialiased`}>
+				<Providers>
+					<SitePreloader>{children}</SitePreloader>
+				</Providers>
+			</body>
+		</html>
+	);
 }
