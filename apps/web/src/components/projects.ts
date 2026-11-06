@@ -37,9 +37,9 @@ export interface Project {
 	brand: string;
 	/** Short line for nav, meta, and “Next project” links. */
 	lede: string;
-	/** Visible page title (often a tagline, not the client name). */
+	/** Large uppercase line on the case-study page. */
 	headline: string;
-	/** Supporting intro under the headline — single muted paragraph. */
+	/** Small uppercase label above the headline. */
 	summary: string;
 	hero: ProjectImage;
 	frames: readonly ProjectFrame[];
@@ -53,9 +53,8 @@ export const PROJECTS = [
 		title: "Tenryuu",
 		brand: "Oasis",
 		lede: "Tenryuu is an identity held in a tall field.",
-		headline: "Tenryuu is an identity held in a tall field.",
-		summary:
-			"The mark sits low. The photograph carries most of the story; type stays out of the way.",
+		headline: "the oasis? you found it!",
+		summary: "oasis - brand",
 		hero: {
 			src: "/work/tenryuu/01.png",
 			alt: "Oasis, the mark on a dark field",
@@ -141,9 +140,8 @@ export const PROJECTS = [
 		title: "Notes from the long way round",
 		brand: "Navia",
 		lede: "A travel product where the screen sits in the hand and the colour around it is the place.",
-		headline: "Notes from the long way round",
-		summary:
-			"Navia keeps the itinerary in a narrow column. The place around the phone stays the main image.",
+		headline: "traveling? we made it easier for ya!",
+		summary: "Navia - brand & product design",
 		hero: {
 			src: "/work/travel-app/01.png",
 			alt: "Navia, a phone in a warm field",
@@ -223,8 +221,7 @@ export const PROJECTS = [
 		// Copy from Figma IDSC---WEB node 646:9 (Chili Riders case study).
 		lede: "Hot sauce brand for the night ride.",
 		headline: "An intense, fire-kissed flavor for the bold.",
-		summary:
-			"Poster, mascot, repeat pattern, and a typeface that can stretch without going soft.",
+		summary: "chili riders - brand",
 		hero: {
 			src: "/work/chili-riders/hero.png",
 			alt: "Chili Riders poster on a concrete wall",

@@ -1396,10 +1396,10 @@ html.view-transition-lock {
 	padding-top: 200px;
 	padding-bottom: 96px;
 	text-align: center;
-	color: #141414;
+	color: #454545;
 }
 
-/* Headline + muted intro (Office Commun case__words, without long essay rows). */
+/* Two centered lines from the Figma case studies: 16px label, then ~28px line. */
 .project-hero {
 	padding-top: 0;
 	padding-bottom: 0;
@@ -1407,12 +1407,13 @@ html.view-transition-lock {
 }
 
 .project-hero h1 {
-	margin: 0 auto;
-	max-width: 22em;
-	font-size: clamp(28px, 2.4vw, 34px);
-	line-height: 1.25;
-	letter-spacing: -0.03em;
-	font-weight: 400;
+	margin: 10px auto 0;
+	max-width: 829px;
+	font-size: 27.729px;
+	line-height: normal;
+	letter-spacing: normal;
+	font-weight: 500;
+	text-transform: uppercase;
 	text-wrap: pretty;
 	text-box-edge: cap alphabetic;
 	text-box-trim: trim-both;
@@ -1422,13 +1423,16 @@ html.view-transition-lock {
 }
 
 .project-words-summary {
-	max-width: 36rem;
-	margin: 20px auto 0;
+	max-width: 829px;
+	margin: 0 auto;
 	font-size: 16px;
-	line-height: 1.4;
-	font-weight: 400;
-	color: rgb(20 20 20 / 0.55);
+	line-height: normal;
+	font-weight: 500;
+	color: #454545;
+	text-transform: uppercase;
 	text-wrap: pretty;
+	text-box-edge: cap alphabetic;
+	text-box-trim: trim-both;
 }
 
 .project-media {
