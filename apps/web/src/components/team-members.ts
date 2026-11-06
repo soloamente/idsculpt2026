@@ -37,8 +37,7 @@ export const TEAM_MEMBERS = [
 		image: "/team/adam/adam.png",
 		bio: "Started the studio and still signs off on the work that carries the name.",
 		highlights: [
-			{ id: "tenryuu", label: "Tenryuu", href: "/work/tenryuu" },
-			{ id: "oasis", label: "Oasis" },
+			{ id: "oasis", label: "Oasis", href: "/work/oasis" },
 		],
 		socials: [
 			{
@@ -56,11 +55,11 @@ export const TEAM_MEMBERS = [
 		image: "/team/adgv/adgv.png",
 		bio: "Leads identity, type, and the printed and digital surfaces the studio puts into the world. The work runs from naming through to the last layout, including the cases where a system has to hold a long product name, a two-line headline, and a dense caption without falling apart.",
 		highlights: [
-			{ id: "tenryuu", label: "Tenryuu", href: "/work/tenryuu" },
+			{ id: "oasis", label: "Oasis", href: "/work/oasis" },
 			{
 				id: "travel",
-				label: "Notes from the long way round",
-				href: "/work/travel-app",
+				label: "Navia",
+				href: "/work/navia",
 			},
 			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
 		],
@@ -78,7 +77,7 @@ export const TEAM_MEMBERS = [
 			{
 				id: "travel",
 				label: "Navia",
-				href: "/work/travel-app",
+				href: "/work/navia",
 			},
 			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
 		],
@@ -92,7 +91,7 @@ export const TEAM_MEMBERS = [
 		bio: "Sets the brief, the sequence, and who the work is actually for, before anyone opens a file.",
 		highlights: [
 			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
-			{ id: "tenryuu", label: "Tenryuu", href: "/work/tenryuu" },
+			{ id: "oasis", label: "Oasis", href: "/work/oasis" },
 		],
 		socials: [
 			{ network: "linkedin", label: "LinkedIn", href: STUDIO_LINKEDIN },

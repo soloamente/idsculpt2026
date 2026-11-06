@@ -21,12 +21,12 @@ export interface ProjectPair {
 export type ProjectFrame = ProjectFull | ProjectPair;
 
 /** Known case-study slugs — keeps `/work/…` links compatible with typed routes. */
-export type ProjectSlug = "tenryuu" | "travel-app" | "chili-riders";
+export type ProjectSlug = "oasis" | "navia" | "chili-riders";
 
 /** Literal paths for Link href (typedRoutes rejects dynamic template strings). */
 export const WORK_PROJECT_PATHS: Record<ProjectSlug, `/work/${ProjectSlug}`> = {
-	tenryuu: "/work/tenryuu",
-	"travel-app": "/work/travel-app",
+	oasis: "/work/oasis",
+	navia: "/work/navia",
 	"chili-riders": "/work/chili-riders",
 };
 
@@ -46,13 +46,14 @@ export interface Project {
 }
 
 // Case-study stills exported from Figma IDSC---WEB, one PNG per gallery row.
-// tenryuu ← node 737:12 (Oasis), travel-app ← 812:103 (Navia), chili-riders ← 646:9.
+// oasis ← node 737:12, navia ← 812:105, chili-riders ← 646:9.
+// Stills stay in public/work/tenryuu and public/work/travel-app; those folder names are not the projects.
 export const PROJECTS = [
 	{
-		slug: "tenryuu",
-		title: "Tenryuu",
+		slug: "oasis",
+		title: "Oasis",
 		brand: "Oasis",
-		lede: "Tenryuu is an identity held in a tall field.",
+		lede: "the oasis? you found it!",
 		headline: "the oasis? you found it!",
 		summary: "oasis - brand",
 		hero: {
@@ -136,10 +137,10 @@ export const PROJECTS = [
 		],
 	},
 	{
-		slug: "travel-app",
-		title: "Notes from the long way round",
+		slug: "navia",
+		title: "Navia",
 		brand: "Navia",
-		lede: "A travel product where the screen sits in the hand and the colour around it is the place.",
+		lede: "traveling? we made it easier for ya!",
 		headline: "traveling? we made it easier for ya!",
 		summary: "Navia - brand & product design",
 		hero: {

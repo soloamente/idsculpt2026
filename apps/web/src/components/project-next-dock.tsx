@@ -31,6 +31,14 @@ export function ProjectNextDock({ currentSlug }: ProjectNextDockProps) {
 	const [open, setOpen] = useState(false);
 	const dismissedUntilLeaveRef = useRef(false);
 	const rafRef = useRef<number | null>(null);
+	// A tap at the bottom of a phone shows the browser chrome and nudges the
+	// scroll. That used to close the sheet (and set it inert) before the click
+	// landed, so the rise never started. Hold the sheet open across the tap.
+	const pointerHoldingRef = useRef(false);
+	const pointerHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+		null,
+	);
+	const scheduleTickRef = useRef<() => void>(() => {});
 	const titleId = useId();
 
 	useEffect(() => {
@@ -60,6 +68,11 @@ export function ProjectNextDock({ currentSlug }: ProjectNextDockProps) {
 		}
 
 		function applyOpenState(atBottom: boolean) {
+			if (document.documentElement.hasAttribute("data-view-transition")) return;
+			if (pointerHoldingRef.current) {
+				setOpen(true);
+				return;
+			}
 			if (!atBottom) {
 				dismissedUntilLeaveRef.current = false;
 				setOpen(false);
@@ -76,9 +89,14 @@ export function ProjectNextDock({ currentSlug }: ProjectNextDockProps) {
 		}
 
 		function scheduleTick() {
+			// A scroll-to-top during the page rise must not close the sheet and
+			// re-render the outgoing page — iOS drops the transition when it does.
+			if (document.documentElement.hasAttribute("data-view-transition")) return;
 			if (rafRef.current != null) return;
 			rafRef.current = requestAnimationFrame(tick);
 		}
+
+		scheduleTickRef.current = scheduleTick;
 
 		const node = sentinelRef.current;
 		// Primary: IO fires when the sentinel enters/leaves the viewport (no dependency on scroll events).
@@ -115,6 +133,9 @@ export function ProjectNextDock({ currentSlug }: ProjectNextDockProps) {
 			window.removeEventListener("app-scroll", scheduleTick);
 			window.removeEventListener("resize", scheduleTick);
 			if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+			if (pointerHoldTimerRef.current != null) {
+				clearTimeout(pointerHoldTimerRef.current);
+			}
 			ro?.disconnect();
 		};
 	}, [currentSlug]);
@@ -164,11 +185,38 @@ export function ProjectNextDock({ currentSlug }: ProjectNextDockProps) {
 					<Link
 						href={href}
 						transitionTypes={["page-rise"]}
+						// A drag on this card must not become a scroll. On a phone
+						// that scroll cancels the click, so the rise never starts.
 						className={cn(
-							"project-next-dock__panel block bg-black px-6 pt-10 pb-8 text-white no-underline outline-none",
+							"project-next-dock__panel block touch-none bg-black px-6 pt-10 pb-8 text-white no-underline outline-none",
 							"focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
 						)}
 						aria-describedby={`${titleId}-hint`}
+						onPointerDown={(event) => {
+							pointerHoldingRef.current = true;
+							if (pointerHoldTimerRef.current != null) {
+								clearTimeout(pointerHoldTimerRef.current);
+								pointerHoldTimerRef.current = null;
+							}
+							// Keep the gesture if the browser chrome shifts the card
+							// out from under the finger before pointerup.
+							try {
+								event.currentTarget.setPointerCapture(event.pointerId);
+							} catch {
+								// The pointer can already be gone. The click still lands.
+							}
+						}}
+						onPointerUp={() => {
+							pointerHoldTimerRef.current = setTimeout(() => {
+								pointerHoldingRef.current = false;
+								pointerHoldTimerRef.current = null;
+								scheduleTickRef.current();
+							}, 700);
+						}}
+						onPointerCancel={() => {
+							pointerHoldingRef.current = false;
+							scheduleTickRef.current();
+						}}
 					>
 						<p
 							id={titleId}

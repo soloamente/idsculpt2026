@@ -30,8 +30,8 @@ const REVIEWS_BY_BRAND = reviewsByBrand();
  * Values are normalized keys matching `HOME_REVIEWS[].brand`.
  */
 const REVIEW_LOOKUP_BY_SLUG: Partial<Record<ProjectSlug, string>> = {
-	// Meyou testimonial — case study is filed under Navia (`travel-app`).
-	"travel-app": "meyou",
+	// Meyou testimonial is shown on the Navia case study.
+	navia: "meyou",
 };
 
 /**

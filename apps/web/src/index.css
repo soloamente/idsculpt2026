@@ -172,7 +172,11 @@
    one-viewport box as the top push, with the seam on the top edge of the box. */
 @keyframes rise-in-box {
 	from {
+		/* 100vh on a phone is the large viewport, taller than the screen while
+		   the browser chrome is up, so the page would start below the visible
+		   bottom. 100dvh is the viewport the user can actually see. */
 		translate: 0 100vh;
+		translate: 0 100dvh;
 	}
 	to {
 		translate: 0 0;
@@ -197,12 +201,14 @@
 	}
 	to {
 		transform: translateY(calc(-100px - 100vh / 9));
+		transform: translateY(calc(-100px - 100dvh / 9));
 	}
 }
 
 ::view-transition-group(.page-rise-in) {
 	z-index: 2;
 	height: 100vh;
+	height: 100dvh;
 	overflow: clip;
 	animation:
 		rise-in-box var(--push-duration) var(--push-ease) var(--push-delay) both,
@@ -234,6 +240,30 @@
 
 html.view-transition-lock {
 	overflow: clip;
+}
+
+/*
+ * Phone next-project rise. A scrolled document makes iOS capture the outgoing
+ * page from the top, so the rise plays above the screen. Before that capture
+ * the shell is pinned to the viewport and shifted by the scroll offset
+ * (holdScrollForViewTransitions); the attribute is cleared inside the update
+ * so the incoming page is captured from its own top.
+ */
+[data-page-shell][data-rise-pin] {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100vh;
+	height: 100dvh;
+	overflow: hidden;
+}
+
+[data-page-shell][data-rise-pin] > * {
+	/* h-full would shrink the page to the pinned viewport and the shift
+	   would have nothing below the fold to bring up. */
+	height: auto !important;
+	translate: 0 var(--rise-pin, 0px);
 }
 
 /*

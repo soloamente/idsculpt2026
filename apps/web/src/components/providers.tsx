@@ -24,6 +24,76 @@ const SCROLL_KEYS = new Set([
 	"ArrowDown",
 ]);
 
+function transitionTypesOf(update: unknown): readonly string[] {
+	if (!update || typeof update !== "object" || !("types" in update)) return [];
+	const types = (update as { types?: unknown }).types;
+	if (!Array.isArray(types)) return [];
+	return types.filter((type): type is string => typeof type === "string");
+}
+
+/**
+ * iOS captures a scrolled page from the document top, so the next-project rise
+ * (always started at the bottom of a case study) plays above the visible screen.
+ * Pin the shell over the viewport, shift it by the current scroll, then zero
+ * the document scroll — both snapshots then share scroll 0, and the outgoing
+ * bitmap is still the screen the user was looking at.
+ * Returns a restore that must run at the start of the update callback, before
+ * the incoming page is captured.
+ */
+function pinPageShellForRise(): () => void {
+	const shell = document.querySelector<HTMLElement>("[data-page-shell]");
+	const y = window.scrollY || document.documentElement.scrollTop || 0;
+	if (!shell || y <= 1) return () => {};
+
+	const previousBehavior = document.documentElement.style.scrollBehavior;
+	document.documentElement.style.scrollBehavior = "auto";
+	shell.style.setProperty("--rise-pin", `${-y}px`);
+	shell.setAttribute("data-rise-pin", "");
+	window.scrollTo(0, 0);
+	document.documentElement.style.scrollBehavior = previousBehavior;
+
+	let restored = false;
+	return () => {
+		if (restored) return;
+		restored = true;
+		shell.removeAttribute("data-rise-pin");
+		shell.style.removeProperty("--rise-pin");
+	};
+}
+
+/** Run `restore` before the DOM update so the incoming snapshot is not pinned. */
+function withRestoreBeforeUpdate(update: unknown, restore: () => void): unknown {
+	let pending = true;
+	const restoreOnce = () => {
+		if (!pending) return;
+		pending = false;
+		restore();
+	};
+	if (typeof update === "function") {
+		return () => {
+			restoreOnce();
+			return (update as () => unknown)();
+		};
+	}
+	if (
+		update &&
+		typeof update === "object" &&
+		"update" in update &&
+		typeof (update as { update?: unknown }).update === "function"
+	) {
+		const record = update as { update: () => unknown };
+		return {
+			...record,
+			update: () => {
+				restoreOnce();
+				return record.update();
+			},
+		};
+	}
+	restoreOnce();
+	return update;
+}
+
 /**
  * The page push animates a `::view-transition-group` that is positioned against
  * the document. A scroll while it runs adds that delta to the group's transform,
@@ -68,14 +138,26 @@ function holdScrollForViewTransitions(lenis: Lenis | null): () => void {
 		let frozenY = 0;
 		let pinning = false;
 		let released = false;
+		// The dock listens for scroll. A scroll-to-top inside the transition
+		// would close it and re-render the outgoing page, which makes iOS drop
+		// the animation. The attribute tells the dock to sit still.
+		document.documentElement.setAttribute("data-view-transition", "");
 		const pinScroll = () => {
 			if (!pinning) return;
 			if (window.scrollY !== frozenY) window.scrollTo(0, frozenY);
 		};
+		// Phone only: Lenis already keeps the desktop rise on screen, and a
+		// manual scrollTo would fight it.
+		let restoreRisePin = () => {};
+		if (!lenis && transitionTypesOf(update).includes("page-rise")) {
+			restoreRisePin = pinPageShellForRise();
+		}
 		const release = () => {
 			if (released) return;
 			released = true;
 			pinning = false;
+			restoreRisePin();
+			document.documentElement.removeAttribute("data-view-transition");
 			document.documentElement.classList.remove("view-transition-lock");
 			window.removeEventListener("scroll", pinScroll);
 			window.removeEventListener("wheel", blockWheel, { capture: true });
@@ -86,7 +168,10 @@ function holdScrollForViewTransitions(lenis: Lenis | null): () => void {
 
 		let transition: ViewTransition;
 		try {
-			transition = original.call(this, update);
+			transition = original.call(
+				this,
+				withRestoreBeforeUpdate(update, restoreRisePin),
+			);
 		} catch (error) {
 			release();
 			throw error;
@@ -97,7 +182,11 @@ function holdScrollForViewTransitions(lenis: Lenis | null): () => void {
 			// callback. Pin that offset for the rest of the push.
 			frozenY = window.scrollY;
 			pinning = true;
-			document.documentElement.classList.add("view-transition-lock");
+			// Changing overflow on the root while a transition is running makes
+			// iOS Safari abort it. Touch scrolling is already cancelled above.
+			if (!window.matchMedia("(pointer: coarse)").matches) {
+				document.documentElement.classList.add("view-transition-lock");
+			}
 			window.addEventListener("scroll", pinScroll, { passive: true });
 		}, release);
 		transition.finished.finally(release);

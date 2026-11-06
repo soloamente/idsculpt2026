@@ -37,6 +37,7 @@ export function PageShell({
 	return (
 		<ViewTransition enter={PUSH_ENTER} exit={PUSH_EXIT} default="none">
 			<div
+				data-page-shell=""
 				className={cn(
 					"relative grid min-h-svh w-screen min-w-0 grid-rows-[auto_1fr] bg-white",
 					className,

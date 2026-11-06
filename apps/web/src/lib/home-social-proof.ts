@@ -38,7 +38,7 @@ export const HOME_REVIEWS: readonly HomeReview[] = [
 ] as const;
 
 export const HOME_CLIENTS: readonly HomeClient[] = [
-	{ name: "Tenryuu", line: "Brand identity" },
+	{ name: "Oasis", line: "Brand identity" },
 	{ name: "Navia", line: "Product UI and identity" },
 	{ name: "Chili Riders", line: "Brand identity" },
 ] as const;

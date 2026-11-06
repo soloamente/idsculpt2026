@@ -8,43 +8,43 @@ import {
 } from "@/components/work-carousel";
 import { WorkFigure } from "@/components/work-figure";
 
-// Stills in public/home/crafts. Oasis lives on the Tenryuu case study.
+// Stills in public/home/crafts. These four frames open the Oasis case study.
 const CRAFTS = [
 	{
-		id: "tenryuu",
+		id: "oasis-cover",
 		src: "/home/crafts/tenryuu1.jpg",
-		alt: "Tenryuu",
-		href: "/work/tenryuu",
+		alt: "Oasis",
+		href: "/work/oasis",
 	},
 	{
 		id: "oasis",
 		src: "/home/crafts/oasis.jpg",
 		alt: "Oasis",
-		href: "/work/tenryuu",
+		href: "/work/oasis",
 	},
 	{
 		id: "oasis-1",
 		src: "/home/crafts/oasis1.jpg",
 		alt: "Oasis",
-		href: "/work/tenryuu",
+		href: "/work/oasis",
 	},
 	{
 		id: "oasis-2",
 		src: "/home/crafts/oasis2.jpg",
 		alt: "Oasis",
-		href: "/work/tenryuu",
+		href: "/work/oasis",
 	},
 	{
 		id: "navia",
 		src: "/home/crafts/navia1.jpg",
 		alt: "Navia",
-		href: "/work/travel-app",
+		href: "/work/navia",
 	},
 	{
 		id: "navia-phone",
 		src: "/home/crafts/navia_phone.jpg",
 		alt: "Navia on a phone",
-		href: "/work/travel-app",
+		href: "/work/navia",
 	},
 	{
 		id: "chili-riders",
