@@ -26,19 +26,32 @@ export interface TeamMember {
 }
 
 const STUDIO_INSTAGRAM = "https://www.instagram.com/idsculpt/";
+const STUDIO_X = "https://x.com/Identitysculpt";
 const STUDIO_LINKEDIN = "https://www.linkedin.com/company/identitysculpt/";
 
 // Portraits live at public/team/<name>/<name>.png.
 export const TEAM_MEMBERS = [
+	{
+		id: "daniele",
+		name: "Daniele Pisani",
+		role: "Founder & Managing Director",
+		image: "/team/daniele/daniele.png",
+		bio: "Sets the brief, the sequence, and who the work is actually for, before anyone opens a file.",
+		highlights: [
+			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
+			{ id: "oasis", label: "Oasis", href: "/work/oasis" },
+		],
+		socials: [
+			{ network: "linkedin", label: "LinkedIn", href: STUDIO_LINKEDIN },
+		],
+	},
 	{
 		id: "adam",
 		name: "Adam Adamu",
 		role: "Co-Founder & Creative Director",
 		image: "/team/adam/adam.png",
 		bio: "Started the studio and still signs off on the work that carries the name.",
-		highlights: [
-			{ id: "oasis", label: "Oasis", href: "/work/oasis" },
-		],
+		highlights: [{ id: "oasis", label: "Oasis", href: "/work/oasis" }],
 		socials: [
 			{
 				network: "instagram",
@@ -63,9 +76,7 @@ export const TEAM_MEMBERS = [
 			},
 			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
 		],
-		socials: [
-			{ network: "instagram", label: "Instagram", href: STUDIO_INSTAGRAM },
-		],
+		socials: [{ network: "x", label: "X (twitter)", href: STUDIO_X }],
 	},
 	{
 		id: "annalaura",
@@ -82,19 +93,5 @@ export const TEAM_MEMBERS = [
 			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
 		],
 		socials: [],
-	},
-	{
-		id: "daniele",
-		name: "Daniele Pisani",
-		role: "Founder & Managing Director",
-		image: "/team/daniele/daniele.png",
-		bio: "Sets the brief, the sequence, and who the work is actually for, before anyone opens a file.",
-		highlights: [
-			{ id: "chili", label: "Chili Riders", href: "/work/chili-riders" },
-			{ id: "oasis", label: "Oasis", href: "/work/oasis" },
-		],
-		socials: [
-			{ network: "linkedin", label: "LinkedIn", href: STUDIO_LINKEDIN },
-		],
 	},
 ] as const satisfies readonly TeamMember[];

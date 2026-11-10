@@ -16,13 +16,6 @@ export function ProjectFooter() {
 				</p>
 				<nav aria-label="Social">
 					<a
-						href="https://www.instagram.com/idsculpt/"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Instagram
-					</a>
-					<a
 						href="https://www.linkedin.com/company/identitysculpt/"
 						target="_blank"
 						rel="noopener noreferrer"

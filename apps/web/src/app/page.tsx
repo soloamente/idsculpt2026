@@ -28,9 +28,9 @@ export default function Home() {
 				<RevealSection className="w-full min-w-0">
 					<HomePostRailSection />
 				</RevealSection>
-				<RevealSection className="w-full min-w-0">
+				{/* <RevealSection className="w-full min-w-0">
 					<HomeReviewsSection />
-				</RevealSection>
+				</RevealSection> */}
 				<RevealSection className="home-page-bottom w-full min-w-0">
 					{/* Same line as navbar contact panel; shown as the section title only (no extra body). */}
 					<ProjectCloseSection heading={<h2>{CONTACT_NOTE}</h2>} />

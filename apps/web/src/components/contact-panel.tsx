@@ -9,7 +9,7 @@ import {
 	CONTACT_WHATSAPP_HREF,
 } from "@/lib/contact";
 
-const INSTAGRAM_URL = "https://www.instagram.com/idsculpt/";
+const X_URL = "https://x.com/Identitysculpt";
 
 // Panel copy (navbar contact state): "We are based in Italy." stays fixed per brand.
 const ITALY_HEADLINE = "We are based in Italy.";
@@ -112,14 +112,14 @@ export function ContactPanel({ open }: ContactPanelProps) {
 							</a>
 						</p>
 						<p className="flex items-center gap-[8.5px]">
-							<span className="opacity-50">Instagram</span>
+							<span className="opacity-50">Twitter (X)</span>
 							<a
-								href={INSTAGRAM_URL}
+								href={X_URL}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="hover:underline"
 							>
-								@idsculpt
+								@Identitysculpt
 							</a>
 						</p>
 					</div>
